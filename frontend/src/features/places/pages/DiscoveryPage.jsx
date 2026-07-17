@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import FormMessage from '../../auth/components/FormMessage.jsx'
+import FormMessage from '../../../shared/components/FormMessage.jsx'
 import { useAuth } from '../../auth/context/AuthContext.jsx'
 import { placeApi } from '../api/placeApi.js'
 import PlaceCard from '../components/PlaceCard.jsx'

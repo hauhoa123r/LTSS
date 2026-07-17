@@ -1,4 +1,4 @@
-import httpClient from '../../../services/httpClient.js'
+import httpClient from '../../../services/apiClient.js'
 
 function data(response) {
   return response.data.data
@@ -15,4 +15,8 @@ export const moderationApi = {
   notifications: (params) => httpClient.get('/account/notifications', { params }).then(data),
   unreadCount: () => httpClient.get('/account/notifications/unread-count').then(data),
   markNotificationRead: (id) => httpClient.post(`/account/notifications/${id}/read`).then(data),
+  articleCategories: (params) => httpClient.get('/moderation/article-categories', { params }).then(data),
+  createArticleCategory: (payload) => httpClient.post('/moderation/article-categories', payload).then(data),
+  updateArticleCategory: (id, payload) => httpClient.put(`/moderation/article-categories/${id}`, payload).then(data),
+  deleteArticleCategory: (id) => httpClient.delete(`/moderation/article-categories/${id}`).then(data),
 }

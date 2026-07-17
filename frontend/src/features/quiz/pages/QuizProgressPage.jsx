@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import FormMessage from '../../auth/components/FormMessage.jsx'
+import FormMessage from '../../../shared/components/FormMessage.jsx'
 import { quizApi } from '../api/quizApi.js'
 
 const formatDate = (value) => new Intl.DateTimeFormat('vi-VN', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value))

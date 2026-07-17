@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import FormMessage from '../../auth/components/FormMessage.jsx'
+import FormMessage from '../../../shared/components/FormMessage.jsx'
 import { moderationApi } from '../api/moderationApi.js'
 
 function formatDate(value) {
   return new Intl.DateTimeFormat('vi-VN', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value))
 }
 
-function NotificationsPage() {
+function NotificationsPage({ workspace = false }) {
   const [state, setState] = useState({ data: null, loading: true, error: null })
   const [page, setPage] = useState(0)
 
@@ -26,9 +26,15 @@ function NotificationsPage() {
     setState((current) => ({ ...current, data: { ...current.data, content: current.data.content.map((entry) => entry.id === item.id ? updated : entry) } }))
   }
 
+  const workspaceCopy = workspace === 'moderation'
+    ? 'Theo dõi nội dung mới được gửi và các cập nhật trong quy trình kiểm duyệt.'
+    : workspace === 'relic-manager'
+      ? 'Theo dõi kết quả kiểm duyệt và các cập nhật liên quan đến quiz bạn quản lý.'
+      : 'Kết quả kiểm duyệt và các cập nhật liên quan đến tài khoản của bạn.'
+
   return (
     <section className="notification-page" aria-labelledby="notifications-title">
-      <header className="page-heading"><p className="eyebrow">Tài khoản</p><h1 id="notifications-title">Thông báo</h1><p>Kết quả kiểm duyệt và các cập nhật liên quan đến tài khoản của bạn.</p></header>
+      <header className="page-heading"><p className="eyebrow">{workspace === 'moderation' ? 'Không gian kiểm duyệt' : workspace === 'relic-manager' ? 'Quản lý di tích' : 'Tài khoản'}</p><h1 id="notifications-title">Thông báo</h1><p>{workspaceCopy}</p></header>
       {state.loading && <p className="form-status">Đang tải thông báo…</p>}
       {!state.loading && state.error && <FormMessage error={state.error} />}
       {!state.loading && !state.error && !state.data?.content.length && <div className="discovery-empty"><h2>Chưa có thông báo</h2><p>Các cập nhật mới sẽ xuất hiện tại đây.</p></div>}

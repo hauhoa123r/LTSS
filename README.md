@@ -129,7 +129,7 @@ Public endpoints:
 - `GET /api/v1/articles?q=&category=&page=&size=` and `GET /api/v1/articles/{slug}`
 - `GET /api/v1/events?q=&page=&size=` and `GET /api/v1/events/{slug}`
 
-The frontend exposes `/businesses`, `/articles`, `/events`, and their detail routes. Phase 4 does not seed sample content. Business/content authoring, ownership mutation, and upload remain deferred.
+The frontend exposes `/businesses`, `/articles`, `/events`, and their detail routes. Business Owners have an isolated workspace under `/business-owner` for owned-business analytics, profile data, and paginated views of all owned posts and promotions; ownership-safe read APIs are under `/api/v1/business-owner`. Relic Managers manage their own place-linked promotional articles under `/relic-manager/articles`; articles are saved as drafts and use the existing moderation workflow before publication. The article management API is available at `GET|POST /api/v1/management/articles` and `GET|PUT|DELETE /api/v1/management/articles/{articleId}`. Moderators manage article categories at `/moderation/article-categories` through `/api/v1/moderation/article-categories`. Business post/promotion authoring, other ownership mutation, and upload remain deferred.
 
 ## Phase 5 Moderation
 
@@ -201,7 +201,7 @@ Relic Manager endpoints:
 - `GET|PUT|DELETE /api/v1/management/quizzes/{quizId}`
 - Submit and moderation history use the existing `/api/v1/moderation/targets/QUIZ/{quizId}/...` contract.
 
-The frontend provides `/quizzes`, protected attempt/result and achievement pages, plus authoring routes under `/manage/quizzes`. Badge definitions and quiz-badge mappings remain configuration data: the application does not invent or seed a catalog. See [`docs/phase7-quiz-gamification.md`](docs/phase7-quiz-gamification.md).
+The frontend provides `/quizzes`, protected attempt/result and achievement pages, plus Relic Manager authoring routes under `/relic-manager/quizzes` (with legacy `/manage/quizzes` redirects). Badge definitions and quiz-badge mappings remain configuration data: the application does not invent or seed a catalog. See [`docs/phase7-quiz-gamification.md`](docs/phase7-quiz-gamification.md).
 
 ## Phase 8 Analytics & Administration
 

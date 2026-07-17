@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import FormMessage from '../../auth/components/FormMessage.jsx'
+import FormMessage from '../../../shared/components/FormMessage.jsx'
 import { placeApi } from '../api/placeApi.js'
 import FavoriteButton from '../components/FavoriteButton.jsx'
 import MediaGallery from '../components/MediaGallery.jsx'
-import ReviewSection from '../../community/components/ReviewSection.jsx'
+import { ReviewSection } from '../../community/index.js'
 import { useTrackView } from '../../analytics/hooks/useTrackView.js'
 
 function formatFee(value) {

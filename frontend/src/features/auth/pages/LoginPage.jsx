@@ -1,26 +1,33 @@
 import { useState } from 'react'
-import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
 import AuthCard from '../components/AuthCard.jsx'
-import FormMessage from '../components/FormMessage.jsx'
+import FormMessage from '../../../shared/components/FormMessage.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
 
+function authenticatedLandingPath(user) {
+  if (user?.roles?.includes('ADMINISTRATOR')) return '/admin/dashboard'
+  if (user?.roles?.includes('MODERATOR')) return '/moderation/articles'
+  if (user?.roles?.includes('RELIC_MANAGER')) return '/relic-manager/articles'
+  if (user?.roles?.includes('BUSINESS_OWNER')) return '/business-owner/overview'
+  return '/'
+}
+
 function LoginPage() {
-  const { login, isAuthenticated } = useAuth()
+  const { login, isAuthenticated, user } = useAuth()
   const navigate = useNavigate()
-  const location = useLocation()
   const [form, setForm] = useState({ email: '', password: '' })
   const [error, setError] = useState(null)
   const [submitting, setSubmitting] = useState(false)
 
-  if (isAuthenticated) return <Navigate to="/profile" replace />
+  if (isAuthenticated) return <Navigate to={authenticatedLandingPath(user)} replace />
 
   async function handleSubmit(event) {
     event.preventDefault()
     setSubmitting(true)
     setError(null)
     try {
-      await login(form)
-      navigate(location.state?.from?.pathname || '/profile', { replace: true })
+      const authenticatedUser = await login(form)
+      navigate(authenticatedLandingPath(authenticatedUser), { replace: true })
     } catch (requestError) {
       setError(requestError)
     } finally {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import FormMessage from '../../auth/components/FormMessage.jsx'
+import FormMessage from '../../../shared/components/FormMessage.jsx'
 import { contentApi } from '../api/contentApi.js'
 import ContentCard from '../components/ContentCard.jsx'
 

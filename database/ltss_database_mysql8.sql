@@ -1136,6 +1136,7 @@ CREATE TABLE IF NOT EXISTS moderation_records (
     tour_id BIGINT UNSIGNED NULL,
     quiz_id BIGINT UNSIGNED NULL,
     review_id BIGINT UNSIGNED NULL,
+    target_snapshot JSON NULL,
     status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
     decision VARCHAR(20) NULL,
     submission_note VARCHAR(1000) NULL,
@@ -1380,6 +1381,12 @@ SET time_zone = '+07:00';
 -- =========================================================
 -- 00. RERUN-SAFE CLEANUP (children before parents)
 -- =========================================================
+-- MySQL Workbench may enable SQL_SAFE_UPDATES for the session. Preserve the
+-- caller's setting, disable it only for this deterministic full-dataset reset,
+-- and restore it after the script completes.
+SET @ltss_old_sql_safe_updates = @@SESSION.SQL_SAFE_UPDATES;
+SET SESSION SQL_SAFE_UPDATES = 0;
+
 DELETE FROM panorama_hotspots WHERE 1 = 1;
 DELETE FROM quiz_media WHERE 1 = 1;
 DELETE FROM review_media WHERE 1 = 1;
@@ -1952,3 +1959,5 @@ SELECT DATABASE() AS database_name,
        (SELECT COUNT(*) FROM places) AS places,
        (SELECT COUNT(*) FROM reviews) AS reviews,
        (SELECT COUNT(*) FROM engagement_events) AS engagement_events;
+
+SET SESSION SQL_SAFE_UPDATES = @ltss_old_sql_safe_updates;

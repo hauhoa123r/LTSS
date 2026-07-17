@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import { clearAccessToken, setAccessToken } from '../../../services/authSession.js'
+import { clearAccessToken, setAccessToken } from '../../../services/authTokenService.js'
 import { authApi } from '../api/authApi.js'
 
 const AuthContext = createContext(null)

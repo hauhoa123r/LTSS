@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { authApi } from '../api/authApi.js'
-import FormMessage from '../components/FormMessage.jsx'
+import FormMessage from '../../../shared/components/FormMessage.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
 
 function ProfilePage() {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import FormMessage from '../../auth/components/FormMessage.jsx'
+import FormMessage from '../../../shared/components/FormMessage.jsx'
 import { tourApi } from '../api/tourApi.js'
 
 const STATUS = { DRAFT: 'Bản nháp', REJECTED: 'Bị từ chối', PUBLISHED: 'Đã xuất bản', SUBMITTED: 'Đã gửi', COMPLETED: 'Hoàn thành', CANCELLED: 'Đã hủy', ARCHIVED: 'Lưu trữ' }

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { authApi } from '../api/authApi.js'
 import AuthCard from '../components/AuthCard.jsx'
-import FormMessage from '../components/FormMessage.jsx'
+import FormMessage from '../../../shared/components/FormMessage.jsx'
 
 function ForgotPasswordPage() {
   const [email, setEmail] = useState('')

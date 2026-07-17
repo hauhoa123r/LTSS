@@ -8,6 +8,7 @@
 - Public active article categories, published article search/category filter/detail, linked published place, and ordered media.
 - Public upcoming published-event search and detail with optional linked published place and ordered media.
 - React list/detail routes for businesses, posts, promotions, articles, and events, including loading, empty, error, pagination, and responsive states.
+- Relic Manager article authoring for published places: own-article pagination, draft creation, draft/rejected editing, soft deletion, and submission through the existing moderation workflow.
 
 ## API and data boundaries
 
@@ -20,7 +21,7 @@ Media is read from the existing association tables and canonical media assets. T
 ## Deferred scope
 
 - Business registration, owner assignment, profile editing, suspension, and ownership transfer.
-- Post, promotion, article, event, category, tag, and media authoring.
+- Post, promotion, event, tag, and media authoring. Article authoring is implemented for Relic Managers, and article-category CRUD is implemented for Moderators and Administrators.
 - Content authoring and archive transitions. Submit/cancel/approve/reject are now implemented by the Phase 5 workflow for existing target rows.
 - Media upload, validation, primary-media mutation, and orphan cleanup.
 - Permission-specific management routes and dashboards.

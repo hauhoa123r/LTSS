@@ -1,4 +1,4 @@
-import httpClient from '../../../services/httpClient.js'
+import httpClient from '../../../services/apiClient.js'
 
 function data(response) {
   return response.data.data
@@ -14,6 +14,11 @@ export const contentApi = {
   articleCategories: () => httpClient.get('/article-categories').then(data),
   articles: (params) => httpClient.get('/articles', { params }).then(data),
   article: (slug) => httpClient.get(`/articles/${encodeURIComponent(slug)}`).then(data),
+  managedArticles: (params) => httpClient.get('/management/articles', { params }).then(data),
+  managedArticle: (id) => httpClient.get(`/management/articles/${id}`).then(data),
+  createArticle: (payload) => httpClient.post('/management/articles', payload).then(data),
+  updateArticle: (id, payload) => httpClient.put(`/management/articles/${id}`, payload).then(data),
+  deleteArticle: (id, version) => httpClient.delete(`/management/articles/${id}`, { params: { version } }).then(data),
   events: (params) => httpClient.get('/events', { params }).then(data),
   event: (slug) => httpClient.get(`/events/${encodeURIComponent(slug)}`).then(data),
 }

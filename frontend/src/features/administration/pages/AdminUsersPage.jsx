@@ -1,31 +1,31 @@
 import { useCallback, useEffect, useState } from 'react'
-import FormMessage from '../../auth/components/FormMessage.jsx'
-import { useAuth } from '../../auth/context/AuthContext.jsx'
+import { Link } from 'react-router-dom'
+import FormMessage from '../../../shared/components/FormMessage.jsx'
 import { administrationApi } from '../api/administrationApi.js'
+import { roleLabel } from '../roleLabels.js'
 
-const ROLES = ['TOURIST', 'BUSINESS_OWNER', 'RELIC_MANAGER', 'MODERATOR', 'ADMINISTRATOR']
+const STATUS_LABELS = {
+  PENDING_VERIFICATION: 'Chờ xác minh',
+  ACTIVE: 'Đang hoạt động',
+  DEACTIVATED: 'Đã vô hiệu hóa',
+  SUSPENDED: 'Tạm ngưng',
+  DELETED: 'Đã xóa',
+}
+
+function formatDate(value) {
+  if (!value) return 'Chưa đăng nhập'
+  return new Intl.DateTimeFormat('vi-VN', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(value))
+}
 
 function AdminUsersPage() {
-  const { user: currentUser } = useAuth()
   const [filter, setFilter] = useState({ q: '', status: '' })
   const [query, setQuery] = useState(filter)
+  const [page, setPage] = useState(0)
   const [state, setState] = useState({ data: null, loading: true, error: null })
-  const [actionError, setActionError] = useState(null)
-  const load = useCallback(() => { setState({ data: null, loading: true, error: null }); administrationApi.users({ q: query.q || undefined, status: query.status || undefined, page: 0, size: 50 }).then((data) => setState({ data, loading: false, error: null })).catch((error) => setState({ data: null, loading: false, error })) }, [query])
+  const load = useCallback(() => { setState({ data: null, loading: true, error: null }); administrationApi.users({ q: query.q || undefined, status: query.status || undefined, page, size: 5 }).then((data) => setState({ data, loading: false, error: null })).catch((error) => setState({ data: null, loading: false, error })) }, [page, query])
   useEffect(() => load(), [load])
 
-  async function changeStatus(account, status) {
-    const reason = window.prompt(`Lý do chuyển tài khoản sang ${status}:`)
-    if (!reason?.trim()) return
-    try { await administrationApi.status(account.id, { status, reason: reason.trim(), version: account.version }); setActionError(null); load() } catch (error) { setActionError(error) }
-  }
-  async function toggleRole(account, role, assigned) {
-    const reason = window.prompt(`Lý do ${assigned ? 'thu hồi' : 'gán'} role ${role}:`)
-    if (!reason?.trim()) return
-    try { if (assigned) await administrationApi.revokeRole(account.id, role, { reason: reason.trim() }); else await administrationApi.assignRole(account.id, role, { reason: reason.trim() }); setActionError(null); load() } catch (error) { setActionError(error) }
-  }
-
-  return <section className="admin-page"><header className="page-heading"><p className="eyebrow">Administration</p><h1>Người dùng và vai trò</h1><p>Mọi thay đổi đều yêu cầu lý do, revoke refresh token và ghi audit.</p></header><form className="admin-filters" onSubmit={(event) => { event.preventDefault(); setQuery(filter) }}><label>Tìm kiếm<input value={filter.q} maxLength="200" placeholder="Tên hoặc email" onChange={(event) => setFilter({ ...filter, q: event.target.value })} /></label><label>Trạng thái<select value={filter.status} onChange={(event) => setFilter({ ...filter, status: event.target.value })}><option value="">Tất cả</option>{['PENDING_VERIFICATION', 'ACTIVE', 'DEACTIVATED', 'SUSPENDED', 'DELETED'].map((status) => <option key={status}>{status}</option>)}</select></label><button className="button button--primary">Lọc</button></form><FormMessage error={state.error || actionError} />{state.loading && <p className="form-status">Đang tải người dùng…</p>}<div className="admin-user-list">{state.data?.content.map((account) => { const self = account.id === currentUser?.id; return <article key={account.id}><header><div><p>#{account.id} · {account.status}</p><h2>{account.displayName}</h2><a href={`mailto:${account.email}`}>{account.email}</a></div><span>v{account.version}</span></header><div className="admin-user-actions"><strong>Trạng thái</strong>{account.status === 'ACTIVE' && <><button disabled={self} onClick={() => changeStatus(account, 'SUSPENDED')}>Tạm ngưng</button><button disabled={self} onClick={() => changeStatus(account, 'DEACTIVATED')}>Vô hiệu hóa</button></>}{['SUSPENDED', 'DEACTIVATED'].includes(account.status) && <button disabled={self} onClick={() => changeStatus(account, 'ACTIVE')}>Kích hoạt lại</button>}</div><div className="admin-role-grid">{ROLES.map((role) => { const assigned = account.directRoles.includes(role); return <label key={role}><input type="checkbox" checked={assigned} disabled={self} onChange={() => toggleRole(account, role, assigned)} /> {role}{!assigned && account.effectiveRoles.includes(role) ? ' (kế thừa)' : ''}</label> })}</div></article> })}</div></section>
+  return <section className="admin-page"><header className="page-heading"><p className="eyebrow">Administration</p><h1>Người dùng và vai trò</h1><p>Mỗi trang hiển thị 5 người dùng. Mở chi tiết để xem thông tin và thực hiện thay đổi có kiểm soát.</p></header><form className="admin-filters" onSubmit={(event) => { event.preventDefault(); setPage(0); setQuery(filter) }}><label>Tìm kiếm<input value={filter.q} maxLength="200" placeholder="Tên hoặc email" onChange={(event) => setFilter({ ...filter, q: event.target.value })} /></label><label>Trạng thái<select value={filter.status} onChange={(event) => setFilter({ ...filter, status: event.target.value })}><option value="">Tất cả</option>{['PENDING_VERIFICATION', 'ACTIVE', 'DEACTIVATED', 'SUSPENDED', 'DELETED'].map((status) => <option key={status}>{STATUS_LABELS[status]}</option>)}</select></label><button className="button button--primary">Lọc</button></form><FormMessage error={state.error} />{state.loading && <p className="form-status">Đang tải người dùng…</p>}{state.data && <><div className="admin-table-wrap admin-users-table"><table><thead><tr><th>Người dùng</th><th>Trạng thái</th><th>Đăng nhập gần nhất</th><th>Vai trò</th><th>Thao tác</th></tr></thead><tbody>{state.data.content.map((account) => <tr key={account.id}><td className="admin-users-table__identity"><strong>{account.displayName}</strong><a href={`mailto:${account.email}`}>{account.email}</a><small>#{account.id} · v{account.version}</small></td><td><span className={`admin-dashboard__status admin-dashboard__status--${account.status.toLowerCase()}`}>{STATUS_LABELS[account.status] || account.status}</span></td><td>{formatDate(account.lastLoginAt)}</td><td>{account.effectiveRoles.map((role) => roleLabel(account, role)).join(', ')}</td><td className="admin-users-table__action-cell"><Link className="button button--secondary admin-users-table__detail-link" to={`/admin/users/${account.id}`}>Xem chi tiết</Link></td></tr>)}</tbody></table>{!state.data.content.length && <p>Không tìm thấy người dùng phù hợp.</p>}</div>{state.data.totalPages > 1 && <nav className="pagination" aria-label="Phân trang người dùng"><button type="button" disabled={state.data.first} onClick={() => setPage((current) => current - 1)}>Trang trước</button><span>Trang {page + 1} / {state.data.totalPages} · {state.data.totalElements} người dùng</span><button type="button" disabled={state.data.last} onClick={() => setPage((current) => current + 1)}>Trang sau</button></nav>}</>}</section>
 }
 
 export default AdminUsersPage

@@ -1,4 +1,4 @@
-import httpClient from '../../../services/httpClient.js'
+import httpClient from '../../../services/apiClient.js'
 
 function data(response) {
   return response.data.data

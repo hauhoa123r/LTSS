@@ -1,5 +1,5 @@
 import { ApiError } from '../../../services/apiError.js'
-import httpClient from '../../../services/httpClient.js'
+import httpClient from '../../../services/apiClient.js'
 
 function responseRequestId(response, envelope) {
   if (typeof response.headers?.get === 'function') {

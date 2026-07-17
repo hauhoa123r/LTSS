@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import FormMessage from '../../auth/components/FormMessage.jsx'
+import FormMessage from '../../../shared/components/FormMessage.jsx'
 import { useAuth } from '../../auth/context/AuthContext.jsx'
-import ReviewSection from '../../community/components/ReviewSection.jsx'
+import { ReviewSection } from '../../community/index.js'
 import { tourApi } from '../api/tourApi.js'
 import { useTrackView } from '../../analytics/hooks/useTrackView.js'
 

@@ -1,4 +1,4 @@
-import httpClient from '../../../services/httpClient.js'
+import httpClient from '../../../services/apiClient.js'
 
 const data = (response) => response.data.data
 
