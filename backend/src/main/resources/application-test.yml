@@ -1,0 +1,41 @@
+spring:
+  main:
+    banner-mode: off
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
+      - org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration
+  flyway:
+    enabled: false
+  jpa:
+    open-in-view: false
+
+ltss:
+  security:
+    cors:
+      allowed-origins: http://localhost:5173
+    jwt:
+      issuer: ltss-test
+      secret: test-only-jwt-secret-that-is-at-least-thirty-two-bytes
+      access-token-lifetime: PT15M
+    refresh-cookie:
+      name: ltss_refresh_token
+      secure: false
+      same-site: Lax
+      path: /api/v1/auth
+  account:
+    email:
+      enabled: false
+      from: no-reply@ltss.local
+      frontend-base-url: http://localhost:5173
+    verification-token-lifetime: PT24H
+    refresh-token-lifetime: P7D
+    security-token-lifetime: PT10M
+    token-resend-delay: PT60S
+    temporary-lock-duration: PT15M
+    max-login-failures: 5
+
+logging:
+  level:
+    com.ltss: INFO

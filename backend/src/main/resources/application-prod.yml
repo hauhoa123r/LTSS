@@ -1,0 +1,10 @@
+spring:
+  main:
+    banner-mode: off
+  jpa:
+    show-sql: false
+
+logging:
+  level:
+    root: INFO
+    com.ltss: INFO

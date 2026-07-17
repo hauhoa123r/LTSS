@@ -1,0 +1,24 @@
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+!frontend/.env.example
+
+# Java / Maven
+backend/target/
+*.log
+
+# Node / Vite
+frontend/node_modules/
+frontend/dist/
+
+# IDE and operating system
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Local validation data
+.tmp-*/
+
