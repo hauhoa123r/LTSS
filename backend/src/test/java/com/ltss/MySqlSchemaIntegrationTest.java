@@ -56,7 +56,7 @@ class MySqlSchemaIntegrationTest {
 
     @Test
     void flywayMigratesAndHibernateValidatesTheMySqlSchema() {
-        assertThat(flyway.info().applied()).hasSize(2);
+        assertThat(flyway.info().applied()).hasSize(3);
         assertThat(entityManagerFactory.isOpen()).isTrue();
 
         Integer domainTableCount = jdbcTemplate.queryForObject("""
@@ -72,6 +72,20 @@ class MySqlSchemaIntegrationTest {
         );
         Integer inheritanceCount = jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM role_inheritances",
+                Integer.class
+        );
+        Integer demoUserCount = jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM users
+                WHERE email IN (
+                    'tourist@gmail.com',
+                    'owner@gmail.com',
+                    'moderator@gmail.com',
+                    'relic@gmail.com',
+                    'admin@gmail.com'
+                )
+                """,
                 Integer.class
         );
         Integer removedCheckCount = jdbcTemplate.queryForObject("""
@@ -100,7 +114,27 @@ class MySqlSchemaIntegrationTest {
         assertThat(domainTableCount).isEqualTo(49);
         assertThat(roleCount).isEqualTo(5);
         assertThat(inheritanceCount).isEqualTo(2);
+        assertThat(demoUserCount).isEqualTo(5);
         assertThat(removedCheckCount).isZero();
         assertThat(generatedColumnExtra).containsIgnoringCase("STORED GENERATED");
+
+        java.util.List<String> domainTableNames = jdbcTemplate.queryForList("""
+                SELECT table_name
+                FROM information_schema.tables
+                WHERE table_schema = DATABASE()
+                  AND table_type = 'BASE TABLE'
+                  AND table_name <> 'flyway_schema_history'
+                ORDER BY table_name
+                """, String.class);
+
+        for (String tableName : domainTableNames) {
+            Integer rowCount = jdbcTemplate.queryForObject(
+                    "SELECT COUNT(*) FROM `" + tableName + "`",
+                    Integer.class
+            );
+            assertThat(rowCount)
+                    .as("seed row count for table " + tableName)
+                    .isPositive();
+        }
     }
 }

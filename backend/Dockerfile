@@ -16,6 +16,6 @@ COPY --from=build /workspace/target/ltss-backend-0.0.1-SNAPSHOT.jar /app/app.jar
 
 USER 10001:10001
 
-EXPOSE 8080
+EXPOSE 8081
 
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]

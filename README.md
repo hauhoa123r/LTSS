@@ -32,7 +32,7 @@ docker compose ps
 The development services are exposed at:
 
 - Frontend: `http://localhost:5173`
-- Backend health: `http://localhost:8080/api/v1/health`
+- Backend health: `http://localhost:8081/api/v1/health`
 - MySQL: `localhost:3306` by default
 
 Stop the environment with `docker compose down`. Add `-v` only when you intentionally want to remove the MySQL named volume.
@@ -71,7 +71,7 @@ npm install
 npm run dev
 ```
 
-The frontend environment template defaults to `http://localhost:8080/api/v1`.
+The frontend environment template defaults to `http://localhost:8081/api/v1`.
 
 ## Phase 2 Identity & Access
 
@@ -247,7 +247,7 @@ npm run build
 Test the public endpoint with:
 
 ```bash
-curl http://localhost:8080/api/v1/health
+curl http://localhost:8081/api/v1/health
 ```
 
 ## Schema ownership and design notes
