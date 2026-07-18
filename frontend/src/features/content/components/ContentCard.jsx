@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { resolveDemoContentCover } from '../demoMedia.js'
 
 export function formatDate(value, includeTime = false) {
   if (!value) return 'Đang cập nhật'
@@ -69,11 +70,12 @@ function ContentCard({ item, type }) {
   }
 
   const config = getConfig()
+  const coverUrl = resolveDemoContentCover(type, item, config.cover)
 
   return (
     <article className="content-card">
       <Link className="content-card__media" to={config.to}>
-        {config.cover ? <img src={config.cover} alt="" loading="lazy" /> : <span aria-hidden="true">LT</span>}
+        {coverUrl ? <img src={coverUrl} alt="" loading="lazy" /> : <span aria-hidden="true">LT</span>}
       </Link>
       <div className="content-card__body">
         <p className="content-card__label">{config.label}</p>

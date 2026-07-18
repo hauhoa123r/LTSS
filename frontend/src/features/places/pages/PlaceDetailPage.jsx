@@ -4,6 +4,7 @@ import FormMessage from '../../../shared/components/FormMessage.jsx'
 import { placeApi } from '../api/placeApi.js'
 import FavoriteButton from '../components/FavoriteButton.jsx'
 import MediaGallery from '../components/MediaGallery.jsx'
+import { withDemoPlaceMedia } from '../../content/demoMedia.js'
 import { ReviewSection } from '../../community/index.js'
 import { useTrackView } from '../../analytics/hooks/useTrackView.js'
 
@@ -31,6 +32,7 @@ function PlaceDetailPage() {
   if (state.error) return <section className="discovery-error"><FormMessage error={state.error} /><Link to="/places">Quay lại khám phá</Link></section>
 
   const place = state.place
+  const media = withDemoPlaceMedia(place)
   return (
     <article className="place-detail">
       <div className="place-detail__breadcrumb"><Link to="/places">Khám phá</Link><span>/</span><span>{place.category.name}</span></div>
@@ -38,7 +40,7 @@ function PlaceDetailPage() {
         <div><p className="eyebrow">{place.category.name}</p><h1>{place.name}</h1><p>{place.summary}</p></div>
         <FavoriteButton placeId={place.id} favorite={place.favorite} onChange={(favorite) => setState({ ...state, place: { ...place, favorite } })} />
       </header>
-      <MediaGallery media={place.media} />
+      <MediaGallery media={media} />
       <div className="place-detail__grid">
         <div className="place-detail__content">
           <section><h2>Giới thiệu</h2><p className="preserve-lines">{place.description || 'Nội dung đang được cập nhật.'}</p></section>

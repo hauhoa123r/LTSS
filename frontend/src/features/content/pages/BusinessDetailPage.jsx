@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import FormMessage from '../../../shared/components/FormMessage.jsx'
 import { contentApi } from '../api/contentApi.js'
 import ContentCard from '../components/ContentCard.jsx'
+import { resolveDemoContentCover } from '../demoMedia.js'
 import { ReviewSection } from '../../community/index.js'
 import { useTrackView } from '../../analytics/hooks/useTrackView.js'
 
@@ -28,11 +29,12 @@ function BusinessDetailPage() {
   if (state.error) return <section className="discovery-error"><FormMessage error={state.error} /><Link to="/businesses">Quay lại danh sách</Link></section>
 
   const { business } = state
+  const coverUrl = resolveDemoContentCover('business', business, business.coverUrl)
   return (
     <article className="content-detail">
       <div className="content-detail__breadcrumb"><Link to="/businesses">Doanh nghiệp</Link><span>/</span><span>{business.place.name}</span></div>
       <header className="business-profile">
-        {business.coverUrl && <img src={business.coverUrl} alt="" />}
+        {coverUrl && <img src={coverUrl} alt="" />}
         <div><p className="eyebrow">Đơn vị đã xác thực</p><h1>{business.place.name}</h1><p>{business.place.summary || business.place.address}</p></div>
       </header>
       <div className="content-detail__columns">

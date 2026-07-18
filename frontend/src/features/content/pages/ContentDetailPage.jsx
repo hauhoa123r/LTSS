@@ -4,6 +4,7 @@ import FormMessage from '../../../shared/components/FormMessage.jsx'
 import { contentApi } from '../api/contentApi.js'
 import ContentMedia from '../components/ContentMedia.jsx'
 import { formatDate } from '../components/ContentCard.jsx'
+import { withDemoContentMedia } from '../demoMedia.js'
 import { ReviewSection } from '../../community/index.js'
 import { useTrackView } from '../../analytics/hooks/useTrackView.js'
 
@@ -45,6 +46,7 @@ function ContentDetailPage({ type }) {
   const place = type === 'post' ? item.business?.place : item.place
   const eyebrow = type === 'article' ? item.category?.name : type === 'event' ? 'Sự kiện' : type === 'post' ? item.business?.place?.name : 'Ưu đãi đang diễn ra'
   const body = type === 'article' || type === 'post' ? item.content : item.description
+  const media = withDemoContentMedia(type, item)
 
   return (
     <article className="content-detail">
@@ -55,7 +57,7 @@ function ContentDetailPage({ type }) {
         {item.summary && <p>{item.summary}</p>}
         {type === 'promotion' && discountLabel(item) && <strong className="promotion-value">{discountLabel(item)}</strong>}
       </header>
-      <ContentMedia media={item.media} />
+      <ContentMedia media={media} />
       <div className="content-detail__columns">
         <div className="content-detail__body">
           {body && <section><p className="preserve-lines">{body}</p></section>}

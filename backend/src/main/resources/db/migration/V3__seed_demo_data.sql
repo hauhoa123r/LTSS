@@ -289,17 +289,21 @@ INSERT INTO media_assets (
 )
 VALUES
     (@moderator_user_id, 'IMAGE', 'LTSS_CDN', 'demo/places/thanh-co-son-tay-cover.jpg',
-     'https://cdn.ltss.local/demo/places/thanh-co-son-tay-cover.jpg',
-     'https://cdn.ltss.local/demo/places/thanh-co-son-tay-cover-thumb.jpg',
-     'image/jpeg', 1048576, 1920, 1080, NULL, SHA2('demo-places-thanh-co-son-tay-cover', 256)),
+     'https://commons.wikimedia.org/wiki/Special:FilePath/Th%C3%A0nh_c%E1%BB%95_S%C6%A1n_T%C3%A2y_2021.jpg?width=1280',
+     'https://commons.wikimedia.org/wiki/Special:FilePath/Th%C3%A0nh_c%E1%BB%95_S%C6%A1n_T%C3%A2y_2021.jpg?width=500',
+     'image/jpeg', 173015, 1280, 1279, NULL, SHA2('demo-places-thanh-co-son-tay-cover', 256)),
     (@moderator_user_id, 'PANORAMA_360', 'LTSS_CDN', 'demo/places/thanh-co-son-tay-panorama.jpg',
-     'https://cdn.ltss.local/demo/places/thanh-co-son-tay-panorama.jpg',
-     'https://cdn.ltss.local/demo/places/thanh-co-son-tay-panorama-thumb.jpg',
-     'image/jpeg', 2097152, 4096, 2048, NULL, SHA2('demo-places-thanh-co-son-tay-panorama', 256)),
+     'https://commons.wikimedia.org/wiki/Special:FilePath/Th%C3%A0nh_c%E1%BB%95_S%C6%A1n_T%C3%A2y_2021.jpg?width=1280',
+     'https://commons.wikimedia.org/wiki/Special:FilePath/Th%C3%A0nh_c%E1%BB%95_S%C6%A1n_T%C3%A2y_2021.jpg?width=500',
+     'image/jpeg', 173015, 1280, 1279, NULL, SHA2('demo-places-thanh-co-son-tay-panorama', 256)),
+    (@moderator_user_id, 'IMAGE', 'LTSS_CDN', 'demo/places/chua-mia-cover.jpg',
+     'https://commons.wikimedia.org/wiki/Special:FilePath/Ch%C3%B9a_M%C3%ADa.jpg?width=1280',
+     'https://commons.wikimedia.org/wiki/Special:FilePath/Ch%C3%B9a_M%C3%ADa.jpg?width=640',
+     'image/jpeg', 651320, 1280, 951, NULL, SHA2('demo-places-chua-mia-cover', 256)),
     (@owner_user_id, 'IMAGE', 'LTSS_CDN', 'demo/business/bep-lang-cover.jpg',
-     'https://cdn.ltss.local/demo/business/bep-lang-cover.jpg',
-     'https://cdn.ltss.local/demo/business/bep-lang-cover-thumb.jpg',
-     'image/jpeg', 786432, 1600, 900, NULL, SHA2('demo-business-bep-lang-cover', 256))
+     'https://commons.wikimedia.org/wiki/Special:FilePath/Street_Food_Life_%28Unsplash%29.jpg?width=1280',
+     'https://commons.wikimedia.org/wiki/Special:FilePath/Street_Food_Life_%28Unsplash%29.jpg?width=640',
+     'image/jpeg', 534132, 1280, 853, NULL, SHA2('demo-business-bep-lang-cover', 256))
 ON DUPLICATE KEY UPDATE
     uploaded_by_user_id = VALUES(uploaded_by_user_id),
     media_url = VALUES(media_url),
@@ -314,6 +318,7 @@ ON DUPLICATE KEY UPDATE
 
 SET @place_cover_media_id = (SELECT id FROM media_assets WHERE storage_key = 'demo/places/thanh-co-son-tay-cover.jpg');
 SET @place_panorama_media_id = (SELECT id FROM media_assets WHERE storage_key = 'demo/places/thanh-co-son-tay-panorama.jpg');
+SET @chua_mia_cover_media_id = (SELECT id FROM media_assets WHERE storage_key = 'demo/places/chua-mia-cover.jpg');
 SET @business_cover_media_id = (SELECT id FROM media_assets WHERE storage_key = 'demo/business/bep-lang-cover.jpg');
 
 INSERT INTO business_posts (business_id, created_by_user_id, updated_by_user_id, title, slug, summary, content, status, submitted_at, published_at)
@@ -550,7 +555,9 @@ WHERE NOT EXISTS (
 INSERT IGNORE INTO place_media (place_id, media_asset_id, usage_type, display_order, is_primary)
 VALUES
     (@thanh_co_place_id, @place_cover_media_id, 'COVER', 0, TRUE),
-    (@thanh_co_place_id, @place_panorama_media_id, 'PANORAMA', 1, FALSE);
+    (@thanh_co_place_id, @place_panorama_media_id, 'PANORAMA', 1, FALSE),
+    (@chua_mia_place_id, @chua_mia_cover_media_id, 'COVER', 0, TRUE),
+    (@restaurant_place_id, @business_cover_media_id, 'COVER', 0, TRUE);
 
 INSERT IGNORE INTO event_media (event_id, media_asset_id, usage_type, display_order, is_primary)
 VALUES (@event_id, @place_cover_media_id, 'COVER', 0, TRUE);

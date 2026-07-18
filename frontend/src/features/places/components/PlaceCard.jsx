@@ -1,14 +1,6 @@
 import { Link } from 'react-router-dom'
 import FavoriteButton from './FavoriteButton.jsx'
-import bepLangDuongLamImage from '../../../assets/places/demo-bep-lang-duong-lam.jpg'
-import chuaMiaImage from '../../../assets/places/demo-chua-mia.jpg'
-import thanhCoSonTayImage from '../../../assets/places/demo-thanh-co-son-tay.jpg'
-
-const DEMO_PLACE_IMAGES = {
-  'demo-bep-lang-duong-lam': bepLangDuongLamImage,
-  'demo-chua-mia': chuaMiaImage,
-  'demo-thanh-co-son-tay': thanhCoSonTayImage,
-}
+import { resolveDemoPlaceCover } from '../../content/demoMedia.js'
 
 function formatFee(value) {
   const amount = Number(value)
@@ -17,7 +9,7 @@ function formatFee(value) {
 }
 
 function PlaceCard({ place, onFavoriteChange }) {
-  const coverUrl = DEMO_PLACE_IMAGES[place.slug] || place.coverUrl
+  const coverUrl = resolveDemoPlaceCover(place, place.coverUrl)
 
   return (
     <article className="place-card">
