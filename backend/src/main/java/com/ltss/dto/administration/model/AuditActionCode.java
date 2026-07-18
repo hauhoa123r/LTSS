@@ -18,6 +18,7 @@ public enum AuditActionCode {
     PASSWORD_CHANGED("Đổi mật khẩu"),
     PROFILE_UPDATED("Cập nhật hồ sơ"),
     PROFILE_UPDATE("Cập nhật hồ sơ"),
+    ADMIN_USER_PASSWORD_RESET("Admin đặt lại mật khẩu người dùng"),
     ADMIN_USER_STATUS_CHANGED("Thay đổi trạng thái người dùng"),
     ADMIN_USER_ROLE_ASSIGNED("Gán vai trò người dùng"),
     ADMIN_USER_ROLE_REVOKED("Thu hồi vai trò người dùng"),

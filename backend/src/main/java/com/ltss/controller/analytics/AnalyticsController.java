@@ -40,6 +40,28 @@ public class AnalyticsController {
         return responseFactory.success(service.dashboard(from, to));
     }
 
+    @GetMapping("/admin/monument-statistics")
+    public ApiResponse<MonumentStatisticsResponse> monumentStatistics(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(defaultValue = "DAILY") MonumentGranularity granularity) {
+        return responseFactory.success(service.monumentStatistics(startDate, endDate, granularity));
+    }
+
+    @GetMapping("/admin/business-statistics")
+    public ApiResponse<BusinessStatisticsResponse> businessStatistics(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        return responseFactory.success(service.businessStatistics(startDate, endDate));
+    }
+
+    @GetMapping("/admin/monthly-event-statistics")
+    public ApiResponse<MonthlyEventStatisticsResponse> monthlyEventStatistics(
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Integer month) {
+        return responseFactory.success(service.monthlyEventStatistics(year, month));
+    }
+
     @GetMapping("/admin/retention-status")
     public ApiResponse<RetentionStatusResponse> retentionStatus() {
         return responseFactory.success(service.retentionStatus());

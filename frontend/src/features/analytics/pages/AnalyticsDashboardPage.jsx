@@ -28,6 +28,14 @@ const MODERATION_LABELS = {
   QUIZ: 'Quiz điểm đến',
 }
 
+const EVENT_TYPE_LABELS = {
+  PLACE_VIEW: 'Xem địa điểm',
+  ARTICLE_VIEW: 'Xem bài viết',
+  PROMOTION_CLICK: 'Bấm khuyến mãi',
+  TOUR_VIEW: 'Xem lịch trình',
+  BUSINESS_VIEW: 'Xem doanh nghiệp',
+}
+
 const USER_SORTS = {
   name: (a, b) => a.displayName.localeCompare(b.displayName, 'vi'),
   status: (a, b) => a.status.localeCompare(b.status),
@@ -85,7 +93,7 @@ function KpiCard({ icon, label, value, trend, context }) {
 
 function DashboardSkeleton() {
   return (
-    <div className="admin-dashboard__skeleton" aria-label="Đang tải dashboard" aria-busy="true">
+    <div className="admin-dashboard__skeleton" aria-label="Đang tải bảng điều khiển" aria-busy="true">
       <div className="admin-dashboard__skeleton-heading" />
       <div className="admin-dashboard__skeleton-kpis">
         {Array.from({ length: 6 }, (_, index) => <i key={index} />)}
@@ -198,7 +206,7 @@ function AdminDashboard() {
         <div className="admin-dashboard__secondary-grid">
           <section className="admin-dashboard__panel admin-dashboard__panel--events">
             <header><div><p className="eyebrow">Phân bổ</p><h2>Loại tương tác</h2></div><span>{formatNumber(analytics.authenticatedUsers)} người đã đăng nhập</span></header>
-            {analytics.byType.length ? <ul className="admin-dashboard__event-list">{analytics.byType.slice(0, 5).map((item) => <li key={item.code}><div><span>{item.code.replaceAll('_', ' ')}</span><strong>{formatNumber(item.value)}</strong></div><i><b style={{ width: `${Math.max(4, item.value / Math.max(1, analytics.totalEvents) * 100)}%` }} /></i></li>)}</ul> : <div className="admin-dashboard__empty"><strong>Chưa có loại sự kiện</strong><span>Dữ liệu sẽ xuất hiện khi người dùng bắt đầu tương tác.</span></div>}
+            {analytics.byType.length ? <ul className="admin-dashboard__event-list">{analytics.byType.slice(0, 5).map((item) => <li key={item.code}><div><span>{EVENT_TYPE_LABELS[item.code] || item.code.replaceAll('_', ' ')}</span><strong>{formatNumber(item.value)}</strong></div><i><b style={{ width: `${Math.max(4, item.value / Math.max(1, analytics.totalEvents) * 100)}%` }} /></i></li>)}</ul> : <div className="admin-dashboard__empty"><strong>Chưa có loại sự kiện</strong><span>Dữ liệu sẽ xuất hiện khi người dùng bắt đầu tương tác.</span></div>}
           </section>
 
           <section className="admin-dashboard__panel admin-dashboard__panel--audits">
@@ -238,7 +246,7 @@ function BusinessAnalyticsDashboard({ mode }) {
 
   const analytics = mode === 'admin' ? state.data?.engagement : state.data
   const maxDaily = Math.max(1, ...(analytics?.daily.map((item) => item.value) || [1]))
-  return <section className="analytics-page"><header className="page-heading"><p className="eyebrow">Phase 8</p><h1>{mode === 'admin' ? 'Dashboard hệ thống' : 'Hiệu quả doanh nghiệp'}</h1><p>{mode === 'admin' ? 'Dữ liệu tổng hợp theo UTC, chỉ dành cho Administrator.' : 'Chỉ số được giới hạn theo doanh nghiệp, địa điểm, bài đăng và ưu đãi thuộc tài khoản.'}</p></header><div className="analytics-range"><label>Từ ngày<input type="date" value={range.from} max={range.to} onChange={(event) => setRange({ ...range, from: event.target.value })} /></label><label>Đến ngày<input type="date" value={range.to} min={range.from} onChange={(event) => setRange({ ...range, to: event.target.value })} /></label></div>{state.loading && <p className="form-status">Đang tổng hợp dữ liệu…</p>}<FormMessage error={state.error} />{analytics && <><div className="metric-grid"><article><span>Tổng tương tác</span><strong>{analytics.totalEvents}</strong></article><article><span>Phiên duy nhất</span><strong>{analytics.uniqueSessions}</strong></article><article><span>Người dùng đăng nhập</span><strong>{analytics.authenticatedUsers}</strong></article></div><div className="analytics-panels"><section><h2>Theo loại sự kiện</h2>{!analytics.byType.length ? <p>Chưa có dữ liệu.</p> : <table><thead><tr><th>Loại</th><th>Số lượng</th></tr></thead><tbody>{analytics.byType.map((item) => <tr key={item.code}><td>{item.code}</td><td>{item.value}</td></tr>)}</tbody></table>}</section><section><h2>Xu hướng theo ngày</h2>{!analytics.daily.length ? <p>Chưa có dữ liệu.</p> : <div className="daily-chart">{analytics.daily.map((item) => <div key={item.day}><span>{item.day.slice(5)}</span><i style={{ height: `${Math.max(8, item.value / maxDaily * 140)}px` }} /><strong>{item.value}</strong></div>)}</div>}</section></div></>}</section>
+  return <section className="analytics-page"><header className="page-heading"><p className="eyebrow">Phân tích vận hành</p><h1>{mode === 'admin' ? 'Bảng điều khiển hệ thống' : 'Hiệu quả doanh nghiệp'}</h1><p>{mode === 'admin' ? 'Dữ liệu tổng hợp theo UTC, chỉ dành cho quản trị viên.' : 'Chỉ số được giới hạn theo doanh nghiệp, địa điểm, bài đăng và ưu đãi thuộc tài khoản.'}</p></header><div className="analytics-range"><label>Từ ngày<input type="date" value={range.from} max={range.to} onChange={(event) => setRange({ ...range, from: event.target.value })} /></label><label>Đến ngày<input type="date" value={range.to} min={range.from} onChange={(event) => setRange({ ...range, to: event.target.value })} /></label></div>{state.loading && <p className="form-status">Đang tổng hợp dữ liệu…</p>}<FormMessage error={state.error} />{analytics && <><div className="metric-grid"><article><span>Tổng tương tác</span><strong>{analytics.totalEvents}</strong></article><article><span>Phiên duy nhất</span><strong>{analytics.uniqueSessions}</strong></article><article><span>Người dùng đăng nhập</span><strong>{analytics.authenticatedUsers}</strong></article></div><div className="analytics-panels"><section><h2>Theo loại sự kiện</h2>{!analytics.byType.length ? <p>Chưa có dữ liệu.</p> : <table><thead><tr><th>Loại</th><th>Số lượng</th></tr></thead><tbody>{analytics.byType.map((item) => <tr key={item.code}><td>{EVENT_TYPE_LABELS[item.code] || item.code.replaceAll('_', ' ')}</td><td>{item.value}</td></tr>)}</tbody></table>}</section><section><h2>Xu hướng theo ngày</h2>{!analytics.daily.length ? <p>Chưa có dữ liệu.</p> : <div className="daily-chart">{analytics.daily.map((item) => <div key={item.day}><span>{item.day.slice(5)}</span><i style={{ height: `${Math.max(8, item.value / maxDaily * 140)}px` }} /><strong>{item.value}</strong></div>)}</div>}</section></div></>}</section>
 }
 
 function AnalyticsDashboardPage({ mode }) {

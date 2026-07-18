@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import jakarta.persistence.LockModeType;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 public interface EventRepository extends JpaRepository<EventEntity, Long> {
@@ -32,4 +33,40 @@ public interface EventRepository extends JpaRepository<EventEntity, Long> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select event from EventEntity event where event.id = :id")
     Optional<EventEntity> findLockedById(@Param("id") Long id);
+
+    @Query(value = """
+            SELECT
+                event.id AS eventId,
+                event.title AS title,
+                event.slug AS slug,
+                place.name AS placeName,
+                event.location_note AS locationNote,
+                event.start_at AS startAt,
+                event.end_at AS endAt,
+                CASE
+                    WHEN event.end_at < :nowTime THEN 'HISTORICAL'
+                    WHEN event.start_at <= :nowTime AND event.end_at >= :nowTime THEN 'ACTIVE'
+                    ELSE 'UPCOMING'
+                END AS periodStatus,
+                COUNT(DISTINCT engagement.session_key) AS participantRegistrations,
+                COUNT(DISTINCT engagement.user_id) AS authenticatedParticipants,
+                COUNT(engagement.id) AS engagementCount
+            FROM events event
+            LEFT JOIN places place ON place.id = event.place_id
+            LEFT JOIN engagement_events engagement
+              ON engagement.event_id = event.id
+             AND engagement.occurred_at >= :fromTime
+             AND engagement.occurred_at < :toTime
+            WHERE event.status = 'PUBLISHED'
+              AND event.start_at < :toTime
+              AND event.end_at >= :fromTime
+            GROUP BY event.id, event.title, event.slug, place.name, event.location_note,
+                     event.start_at, event.end_at
+            ORDER BY event.start_at ASC, event.title ASC
+            """, nativeQuery = true)
+    List<MonthlyEventStatisticsProjection> monthlyEventStatistics(
+            @Param("fromTime") Instant from,
+            @Param("toTime") Instant to,
+            @Param("nowTime") Instant now
+    );
 }

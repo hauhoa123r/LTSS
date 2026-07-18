@@ -15,5 +15,12 @@ public interface AnalyticsService {
 
     AdminDashboardResponse dashboard(LocalDate from, LocalDate to);
 
+    MonumentStatisticsResponse monumentStatistics(LocalDate startDate, LocalDate endDate,
+                                                  MonumentGranularity granularity);
+
+    BusinessStatisticsResponse businessStatistics(LocalDate startDate, LocalDate endDate);
+
+    MonthlyEventStatisticsResponse monthlyEventStatistics(Integer year, Integer month);
+
     RetentionStatusResponse retentionStatus();
 }

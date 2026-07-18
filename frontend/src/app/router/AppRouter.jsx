@@ -34,6 +34,9 @@ import QuizProgressPage from '../../features/quiz/pages/QuizProgressPage.jsx'
 import QuizManagementPage from '../../features/quiz/pages/QuizManagementPage.jsx'
 import QuizEditorPage from '../../features/quiz/pages/QuizEditorPage.jsx'
 import AnalyticsDashboardPage from '../../features/analytics/pages/AnalyticsDashboardPage.jsx'
+import MonumentStatisticsPage from '../../features/analytics/pages/MonumentStatisticsPage.jsx'
+import BusinessStatisticsPage from '../../features/analytics/pages/BusinessStatisticsPage.jsx'
+import MonthlyEventStatisticsPage from '../../features/analytics/pages/MonthlyEventStatisticsPage.jsx'
 import AuditLogsPage from '../../features/administration/pages/AuditLogsPage.jsx'
 import AdminUsersPage from '../../features/administration/pages/AdminUsersPage.jsx'
 import AdminUserDetailPage from '../../features/administration/pages/AdminUserDetailPage.jsx'
@@ -115,6 +118,9 @@ function AppRouter() {
         </Route>
         <Route element={<ProtectedRoute allowedRoles={['ADMINISTRATOR']} />}>
           <Route path="admin/dashboard" element={<AnalyticsDashboardPage mode="admin" />} />
+          <Route path="admin/monument-statistics" element={<MonumentStatisticsPage />} />
+          <Route path="admin/business-statistics" element={<BusinessStatisticsPage />} />
+          <Route path="admin/monthly-event-statistics" element={<MonthlyEventStatisticsPage />} />
           <Route path="admin/audit-logs" element={<AuditLogsPage />} />
           <Route path="admin/audit-logs/:id" element={<AuditLogDetailPage />} />
           <Route path="admin/users" element={<AdminUsersPage />} />

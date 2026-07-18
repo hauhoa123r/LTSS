@@ -5,12 +5,14 @@ import com.ltss.service.administration.AdministrationService;
 import com.ltss.common.exception.*;
 import com.ltss.common.response.PageResponse;
 import com.ltss.dto.administration.*;
+import com.ltss.dto.auth.response.MessageResponse;
 import com.ltss.entity.auth.*;
 import com.ltss.repository.auth.*;
 import com.ltss.security.auth.CurrentUserService;
 import com.ltss.service.auth.*;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,26 +21,33 @@ import java.util.*;
 
 @Service
 public class AdministrationServiceImpl implements AdministrationService {
+    private static final String DEFAULT_RESET_PASSWORD = "123@123";
+
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final UserRoleRepository userRoleRepository;
+    private final PasswordHistoryRepository passwordHistoryRepository;
     private final AuthorizationRepository authorizationRepository;
     private final CurrentUserService currentUserService;
     private final AccountTokenService tokenService;
     private final AuditService auditService;
+    private final PasswordEncoder passwordEncoder;
     private final Clock clock;
 
     public AdministrationServiceImpl(UserRepository userRepository, RoleRepository roleRepository,
-                                 UserRoleRepository userRoleRepository, AuthorizationRepository authorizationRepository,
+                                 UserRoleRepository userRoleRepository, PasswordHistoryRepository passwordHistoryRepository,
+                                 AuthorizationRepository authorizationRepository,
                                  CurrentUserService currentUserService, AccountTokenService tokenService,
-                                 AuditService auditService, Clock clock) {
+                                 AuditService auditService, PasswordEncoder passwordEncoder, Clock clock) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.userRoleRepository = userRoleRepository;
+        this.passwordHistoryRepository = passwordHistoryRepository;
         this.authorizationRepository = authorizationRepository;
         this.currentUserService = currentUserService;
         this.tokenService = tokenService;
         this.auditService = auditService;
+        this.passwordEncoder = passwordEncoder;
         this.clock = clock;
     }
 
@@ -119,6 +128,23 @@ public class AdministrationServiceImpl implements AdministrationService {
         auditService.recordDomainChange(actorId, "ADMIN_USER_ROLE_REVOKED", "USER", userId,
                 Map.of("role", roleCode), Map.of("reason", request.reason().trim()), requestInfo);
         return response(requireUser(userId));
+    }
+
+    @Transactional
+    @Override
+    public MessageResponse resetPassword(Long userId, ResetUserPasswordRequest request,
+                                         ClientRequestInfo requestInfo) {
+        Long actorId = requireAdministrator();
+        requireNotSelf(actorId, userId);
+        UserEntity user = requireMutableUser(userId);
+        String encodedPassword = passwordEncoder.encode(DEFAULT_RESET_PASSWORD);
+        user.changePassword(encodedPassword, clock.instant());
+        passwordHistoryRepository.save(new PasswordHistoryEntity(
+                userId, encodedPassword, PasswordChangeReason.ADMIN_RESET, clock.instant()));
+        tokenService.revokeAllRefreshTokens(userId);
+        auditService.recordDomainChange(actorId, "ADMIN_USER_PASSWORD_RESET", "USER", userId,
+                Map.of(), Map.of("reason", request.reason().trim()), requestInfo);
+        return new MessageResponse("Password was reset to the default admin password");
     }
 
     private void requireStatusTransition(UserStatus oldStatus, UserStatus target) {

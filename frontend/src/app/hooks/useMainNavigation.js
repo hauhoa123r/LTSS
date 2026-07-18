@@ -28,13 +28,18 @@ export function useMainNavigation() {
   const isRelicManagerPath = /^(\/relic-manager(?:\/|$)|\/manage\/quizzes(?:\/|$))/.test(pathname)
   const isBusinessOwnerPath = /^\/business-owner(?:\/|$)/.test(pathname)
   const isAdministratorWorkspacePath = /^(\/admin(?:\/|$)|\/moderation(?:\/|$))/.test(pathname)
+  const adminStatisticsLinks = [
+    { to: '/admin/monument-statistics', label: 'Thống kê di tích', icon: '⌖' },
+    { to: '/admin/business-statistics', label: 'Thống kê doanh nghiệp', icon: '◇' },
+    { to: '/admin/monthly-event-statistics', label: 'Thống kê sự kiện', icon: '◷' },
+  ]
 
   const managementLinks = [
     ...(isAdministrator ? [
       { to: '/admin/dashboard', label: 'Tổng quan', icon: '◫' },
+      { id: 'admin-statistics', label: 'Thống kê', icon: '▥', children: adminStatisticsLinks },
       { to: '/admin/users', label: 'Người dùng', icon: '♙' },
       { to: '/admin/audit-logs', label: 'Nhật ký', icon: '≣' },
-      { to: '/moderation/articles', label: 'Kiểm duyệt', icon: '✓' },
     ] : []),
     ...(isRelicManager ? [{ to: RELIC_MANAGER_HOME, label: 'Quản lý di tích', icon: '▤' }] : []),
     ...(isBusinessOwner ? [{ to: BUSINESS_OWNER_HOME, label: 'Kinh doanh', icon: '↗' }] : []),
@@ -47,6 +52,7 @@ export function useMainNavigation() {
       : isBusinessOwnerPath || (isBusinessOwner && !isAdministrator && !isModerator && !isRelicManager)
         ? BUSINESS_OWNER_WORKSPACE_LINKS
         : managementLinks
+  const primaryWorkspaceLinks = workspaceLinks.filter((link) => !link.children?.length)
 
   const accountLinks = user && !isStaff ? [
     { to: '/profile', label: 'Hồ sơ cá nhân', icon: '♙' },
@@ -63,7 +69,7 @@ export function useMainNavigation() {
         ? [{ to: RELIC_MANAGER_HOME, label: 'Quản lý nội dung' }]
         : isBusinessOwnerPath || (isBusinessOwner && !isAdministrator && !isModerator && !isRelicManager)
           ? [{ to: BUSINESS_OWNER_HOME, label: 'Quản lý doanh nghiệp' }]
-          : workspaceLinks
+          : primaryWorkspaceLinks
     : PUBLIC_LINKS
 
   let redirectTo = null

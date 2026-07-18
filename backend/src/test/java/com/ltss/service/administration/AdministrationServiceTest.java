@@ -13,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.*;
@@ -29,16 +30,19 @@ class AdministrationServiceTest {
     @Mock UserRepository userRepository;
     @Mock RoleRepository roleRepository;
     @Mock UserRoleRepository userRoleRepository;
+    @Mock PasswordHistoryRepository passwordHistoryRepository;
     @Mock AuthorizationRepository authorizationRepository;
     @Mock CurrentUserService currentUserService;
     @Mock AccountTokenService tokenService;
     @Mock AuditService auditService;
+    @Mock PasswordEncoder passwordEncoder;
     AdministrationService service;
 
     @BeforeEach
     void setUp() {
         service = new AdministrationServiceImpl(userRepository, roleRepository, userRoleRepository,
-                authorizationRepository, currentUserService, tokenService, auditService,
+                passwordHistoryRepository, authorizationRepository, currentUserService, tokenService, auditService,
+                passwordEncoder,
                 Clock.fixed(NOW, ZoneOffset.UTC));
         lenient().when(currentUserService.requireUserId()).thenReturn(10L);
     }
@@ -73,6 +77,27 @@ class AdministrationServiceTest {
         assertEquals(UserStatus.SUSPENDED, response.status());
         verify(tokenService).revokeAllRefreshTokens(20L);
         verify(auditService).recordDomainChange(eq(10L), eq("ADMIN_USER_STATUS_CHANGED"),
+                eq("USER"), eq(20L), anyMap(), anyMap(), eq(REQUEST));
+    }
+
+    @Test
+    void adminResetPasswordUsesDefaultPasswordAndRevokesSessions() {
+        allowAdmin();
+        UserEntity target = new UserEntity("Nguyễn Văn A", "A", "a@example.com", "old-hash");
+        ReflectionTestUtils.setField(target, "id", 20L);
+        when(userRepository.findById(20L)).thenReturn(Optional.of(target));
+        when(passwordEncoder.encode("123@123")).thenReturn("encoded-default");
+
+        var response = service.resetPassword(20L, new ResetUserPasswordRequest("Người dùng quên mật khẩu"), REQUEST);
+
+        assertEquals("Password was reset to the default admin password", response.message());
+        assertEquals("encoded-default", target.getPasswordHash());
+        assertEquals(NOW, target.getPasswordChangedAt());
+        verify(passwordHistoryRepository).save(argThat(history ->
+                "encoded-default".equals(history.passwordHash())
+                        && ReflectionTestUtils.getField(history, "changeReason") == PasswordChangeReason.ADMIN_RESET));
+        verify(tokenService).revokeAllRefreshTokens(20L);
+        verify(auditService).recordDomainChange(eq(10L), eq("ADMIN_USER_PASSWORD_RESET"),
                 eq("USER"), eq(20L), anyMap(), anyMap(), eq(REQUEST));
     }
 

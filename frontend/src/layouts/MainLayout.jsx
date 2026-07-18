@@ -5,12 +5,20 @@ function navLinkClassName({ isActive }) {
   return isActive ? 'site-nav__link site-nav__link--active' : 'site-nav__link'
 }
 
+function navChildLinkClassName({ isActive }) {
+  return isActive ? 'site-nav__link site-nav__link--child site-nav__link--active' : 'site-nav__link site-nav__link--child'
+}
+
 function drawerLinkClassName({ isActive }) {
   return isActive ? 'mobile-nav__link mobile-nav__link--active' : 'mobile-nav__link'
 }
 
 function workspaceLinkClassName({ isActive }) {
   return isActive ? 'workspace-nav__link workspace-nav__link--active' : 'workspace-nav__link'
+}
+
+function workspaceChildLinkClassName({ isActive }) {
+  return isActive ? 'workspace-nav__link workspace-nav__link--child workspace-nav__link--active' : 'workspace-nav__link workspace-nav__link--child'
 }
 
 function MainLayout({
@@ -39,11 +47,24 @@ function MainLayout({
   const userMenuRef = useRef(null)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [userOpen, setUserOpen] = useState(false)
+  const [openGroups, setOpenGroups] = useState({})
 
   useEffect(() => {
     setMobileOpen(false)
     setUserOpen(false)
   }, [location.pathname])
+
+  useEffect(() => {
+    setOpenGroups((current) => {
+      const next = { ...current }
+      workspaceLinks.forEach((link) => {
+        if (link.children?.some((child) => isPathActive(child, location.pathname))) {
+          next[groupKey(link)] = true
+        }
+      })
+      return next
+    })
+  }, [location.pathname, workspaceLinks])
 
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? 'hidden' : ''
@@ -71,6 +92,123 @@ function MainLayout({
     logout()
   }
 
+  function groupKey(link) {
+    return link.id || link.label
+  }
+
+  function isPathActive(link, pathname) {
+    if (!link.to) return false
+    return link.end ? pathname === link.to : pathname === link.to || pathname.startsWith(`${link.to}/`)
+  }
+
+  function renderPrimaryItem(link) {
+    if (!link.children?.length) {
+      return (
+        <NavLink key={link.to} className={navLinkClassName} to={link.to} end={link.end}>
+          {link.label}
+        </NavLink>
+      )
+    }
+
+    const key = groupKey(link)
+    const isOpen = Boolean(openGroups[key])
+    const isActive = link.children.some((child) => isPathActive(child, location.pathname))
+
+    return (
+      <div key={key} className={`site-nav__group${isOpen ? ' is-open' : ''}${isActive ? ' is-active' : ''}`}>
+        <button
+          className={`site-nav__link site-nav__group-trigger${isActive ? ' site-nav__link--active' : ''}`}
+          type="button"
+          aria-expanded={isOpen}
+          aria-controls={`site-nav-group-${key}`}
+          onClick={() => setOpenGroups((current) => ({ ...current, [key]: !current[key] }))}
+        >
+          <span>{link.label}</span>
+          <span aria-hidden="true">▾</span>
+        </button>
+        <div id={`site-nav-group-${key}`} className="site-nav__group-panel">
+          {link.children.map((child) => (
+            <NavLink key={child.to} className={navChildLinkClassName} to={child.to} end={child.end}>
+              <span aria-hidden="true">{child.icon}</span>
+              <span>{child.label}</span>
+            </NavLink>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  function renderWorkspaceItem(link) {
+    if (!link.children?.length) {
+      return (
+        <NavLink key={link.to} className={workspaceLinkClassName} to={link.to} end={link.end}>
+          <span aria-hidden="true">{link.icon}</span>
+          <span className="workspace-nav__label">{link.label}</span>
+        </NavLink>
+      )
+    }
+
+    const key = groupKey(link)
+    const isOpen = Boolean(openGroups[key])
+    const isActive = link.children.some((child) => isPathActive(child, location.pathname))
+
+    return (
+      <div key={key} className={`workspace-nav__group${isOpen ? ' is-open' : ''}${isActive ? ' is-active' : ''}`}>
+        <button
+          className={`workspace-nav__link workspace-nav__group-trigger${isActive ? ' workspace-nav__link--active' : ''}`}
+          type="button"
+          aria-expanded={isOpen}
+          aria-controls={`workspace-group-${key}`}
+          onClick={() => setOpenGroups((current) => ({ ...current, [key]: !current[key] }))}
+        >
+          <span aria-hidden="true">{link.icon}</span>
+          <span className="workspace-nav__label">{link.label}</span>
+          <span className="workspace-nav__chevron" aria-hidden="true">▾</span>
+        </button>
+        <div id={`workspace-group-${key}`} className="workspace-nav__group-panel">
+          {link.children.map((child) => (
+            <NavLink key={child.to} className={workspaceChildLinkClassName} to={child.to} end={child.end}>
+              <span aria-hidden="true">{child.icon}</span>
+              <span className="workspace-nav__label">{child.label}</span>
+            </NavLink>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  function renderMobileItem(link) {
+    if (!link.children?.length) {
+      return <NavLink key={link.to} className={drawerLinkClassName} to={link.to} end={link.end}>{link.label}</NavLink>
+    }
+
+    const key = groupKey(link)
+    const isOpen = Boolean(openGroups[key])
+    const isActive = link.children.some((child) => isPathActive(child, location.pathname))
+
+    return (
+      <div key={key} className={`mobile-nav__group${isOpen ? ' is-open' : ''}${isActive ? ' is-active' : ''}`}>
+        <button
+          className={`mobile-nav__link mobile-nav__group-trigger${isActive ? ' mobile-nav__link--active' : ''}`}
+          type="button"
+          aria-expanded={isOpen}
+          aria-controls={`mobile-group-${key}`}
+          onClick={() => setOpenGroups((current) => ({ ...current, [key]: !current[key] }))}
+        >
+          <span>{link.label}</span>
+          <span aria-hidden="true">▾</span>
+        </button>
+        <div id={`mobile-group-${key}`} className="mobile-nav__group-panel">
+          {link.children.map((child) => (
+            <NavLink key={child.to} className={({ isActive }) => `${drawerLinkClassName({ isActive })} mobile-nav__link--child`} to={child.to} end={child.end}>
+              {child.label}
+            </NavLink>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
   if (redirectTo) return <Navigate to={redirectTo} replace />
 
   return (
@@ -93,11 +231,7 @@ function MainLayout({
           </NavLink>
 
           <nav className="site-nav" aria-label="Điều hướng chính">
-            {primaryLinks.map((link) => (
-              <NavLink key={link.to} className={navLinkClassName} to={link.to} end={link.end}>
-                {link.label}
-              </NavLink>
-            ))}
+            {primaryLinks.map(renderPrimaryItem)}
           </nav>
 
           <div className="site-header__actions">
@@ -176,15 +310,11 @@ function MainLayout({
             </div>
             <nav className="mobile-nav__body">
               <p>{isAdministrator ? 'Quản trị' : isModerator ? 'Kiểm duyệt' : isRelicManager ? 'Quản lý di tích' : isBusinessOwner ? 'Doanh nghiệp' : 'Khám phá'}</p>
-              {mobileLinks.map((link) => (
-                <NavLink key={link.to} className={drawerLinkClassName} to={link.to} end={link.end}>{link.label}</NavLink>
-              ))}
+              {mobileLinks.map(renderMobileItem)}
               {user && !isStaff && (
                 <>
                   <p>Tài khoản</p>
-                  {workspaceLinks.map((link) => (
-                    <NavLink key={link.to} className={drawerLinkClassName} to={link.to}>{link.label}</NavLink>
-                  ))}
+                  {workspaceLinks.map(renderMobileItem)}
                   {accountLinks.map((link) => (
                     <NavLink key={link.to} className={drawerLinkClassName} to={link.to}>{link.label}</NavLink>
                   ))}
@@ -212,12 +342,7 @@ function MainLayout({
               <span>Không gian làm việc</span>
               <strong>{isModerationPath ? 'Kiểm duyệt LTSS' : isRelicManagerPath ? 'Quản lý di tích' : isBusinessOwnerPath ? 'Chủ doanh nghiệp' : isAdministrator ? 'Quản trị LTSS' : 'Quản lý LTSS'}</strong>
             </div>
-            {workspaceLinks.map((link) => (
-              <NavLink key={link.to} className={workspaceLinkClassName} to={link.to} end={link.end}>
-                <span aria-hidden="true">{link.icon}</span>
-                <span className="workspace-nav__label">{link.label}</span>
-              </NavLink>
-            ))}
+            {workspaceLinks.map(renderWorkspaceItem)}
             <div className="workspace-nav__spacer" />
             {isAdministrator && isModerationPath && (
               <NavLink className="workspace-nav__link" to="/admin/dashboard">

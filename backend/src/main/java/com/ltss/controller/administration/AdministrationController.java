@@ -2,6 +2,7 @@ package com.ltss.controller.administration;
 
 import com.ltss.common.response.*;
 import com.ltss.dto.administration.*;
+import com.ltss.dto.auth.response.MessageResponse;
 import com.ltss.service.administration.*;
 import com.ltss.controller.auth.ClientRequestInfoFactory;
 import com.ltss.entity.auth.UserStatus;
@@ -74,6 +75,15 @@ public class AdministrationController {
             HttpServletRequest httpRequest) {
         return responseFactory.success(administrationService.revokeRole(
                 userId, roleCode, request, requestInfoFactory.from(httpRequest)));
+    }
+
+    @PutMapping("/users/{userId}/password")
+    public ApiResponse<MessageResponse> resetPassword(
+            @PathVariable @Min(1) Long userId,
+            @Valid @RequestBody ResetUserPasswordRequest request,
+            HttpServletRequest httpRequest) {
+        return responseFactory.success(administrationService.resetPassword(
+                userId, request, requestInfoFactory.from(httpRequest)));
     }
 
     @GetMapping("/audit-logs")

@@ -3,6 +3,7 @@ package com.ltss.service.administration;
 import com.ltss.common.exception.*;
 import com.ltss.common.response.PageResponse;
 import com.ltss.dto.administration.*;
+import com.ltss.dto.auth.response.MessageResponse;
 import com.ltss.entity.auth.*;
 import com.ltss.repository.auth.*;
 import com.ltss.service.auth.*;
@@ -22,4 +23,7 @@ public interface AdministrationService {
 
     AdminUserResponse revokeRole(Long userId, String roleCode, RoleChangeRequest request,
                                         ClientRequestInfo requestInfo);
+
+    MessageResponse resetPassword(Long userId, ResetUserPasswordRequest request,
+                                  ClientRequestInfo requestInfo);
 }

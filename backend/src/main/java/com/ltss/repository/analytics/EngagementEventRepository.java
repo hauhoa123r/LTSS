@@ -71,6 +71,114 @@ public interface EngagementEventRepository extends JpaRepository<EngagementEvent
     List<DailyCountProjection> countDaily(@Param("fromTime") Instant from, @Param("toTime") Instant to);
 
     @Query(value = """
+            SELECT DATE(e.occurred_at) AS day, COUNT(DISTINCT e.session_key) AS value
+            FROM engagement_events e
+            JOIN events event ON event.id = e.event_id
+            WHERE event.status = 'PUBLISHED'
+              AND event.start_at < :toTime AND event.end_at >= :fromTime
+              AND e.occurred_at >= :fromTime AND e.occurred_at < :toTime
+            GROUP BY DATE(e.occurred_at) ORDER BY day ASC
+            """, nativeQuery = true)
+    List<DailyCountProjection> countEventRegistrationsDaily(@Param("fromTime") Instant from, @Param("toTime") Instant to);
+
+    @Query(value = """
+            SELECT COUNT(*) FROM engagement_events e
+            WHERE e.event_type_code = 'PLACE_VIEW'
+              AND e.place_id IS NOT NULL
+              AND e.occurred_at >= :fromTime AND e.occurred_at < :toTime
+            """, nativeQuery = true)
+    long countPlaceViews(@Param("fromTime") Instant from, @Param("toTime") Instant to);
+
+    @Query(value = """
+            SELECT COUNT(DISTINCT e.session_key) FROM engagement_events e
+            WHERE e.event_type_code = 'PLACE_VIEW'
+              AND e.place_id IS NOT NULL
+              AND e.occurred_at >= :fromTime AND e.occurred_at < :toTime
+            """, nativeQuery = true)
+    long countPlaceViewSessions(@Param("fromTime") Instant from, @Param("toTime") Instant to);
+
+    @Query(value = """
+            SELECT COUNT(DISTINCT e.user_id) FROM engagement_events e
+            WHERE e.event_type_code = 'PLACE_VIEW'
+              AND e.user_id IS NOT NULL
+              AND e.place_id IS NOT NULL
+              AND e.occurred_at >= :fromTime AND e.occurred_at < :toTime
+            """, nativeQuery = true)
+    long countPlaceViewUsers(@Param("fromTime") Instant from, @Param("toTime") Instant to);
+
+    @Query(value = """
+            SELECT DATE(e.occurred_at) AS day, COUNT(*) AS value
+            FROM engagement_events e
+            WHERE e.event_type_code = 'PLACE_VIEW'
+              AND e.place_id IS NOT NULL
+              AND e.occurred_at >= :fromTime AND e.occurred_at < :toTime
+            GROUP BY DATE(e.occurred_at) ORDER BY day ASC
+            """, nativeQuery = true)
+    List<DailyCountProjection> countPlaceViewsDaily(@Param("fromTime") Instant from, @Param("toTime") Instant to);
+
+    @Query(value = """
+            SELECT DATE(DATE_SUB(e.occurred_at, INTERVAL WEEKDAY(e.occurred_at) DAY)) AS day, COUNT(*) AS value
+            FROM engagement_events e
+            WHERE e.event_type_code = 'PLACE_VIEW'
+              AND e.place_id IS NOT NULL
+              AND e.occurred_at >= :fromTime AND e.occurred_at < :toTime
+            GROUP BY DATE(DATE_SUB(e.occurred_at, INTERVAL WEEKDAY(e.occurred_at) DAY)) ORDER BY day ASC
+            """, nativeQuery = true)
+    List<DailyCountProjection> countPlaceViewsWeekly(@Param("fromTime") Instant from, @Param("toTime") Instant to);
+
+    @Query(value = """
+            SELECT CAST(DATE_FORMAT(e.occurred_at, '%Y-%m-01') AS DATE) AS day, COUNT(*) AS value
+            FROM engagement_events e
+            WHERE e.event_type_code = 'PLACE_VIEW'
+              AND e.place_id IS NOT NULL
+              AND e.occurred_at >= :fromTime AND e.occurred_at < :toTime
+            GROUP BY CAST(DATE_FORMAT(e.occurred_at, '%Y-%m-01') AS DATE) ORDER BY day ASC
+            """, nativeQuery = true)
+    List<DailyCountProjection> countPlaceViewsMonthly(@Param("fromTime") Instant from, @Param("toTime") Instant to);
+
+    @Query(value = """
+            SELECT
+                p.id AS placeId,
+                p.name AS name,
+                p.slug AS slug,
+                p.address AS address,
+                COUNT(e.id) AS visits,
+                COUNT(DISTINCT e.session_key) AS uniqueSessions,
+                COUNT(DISTINCT e.user_id) AS authenticatedVisitors,
+                MAX(e.occurred_at) AS lastVisitAt
+            FROM places p
+            LEFT JOIN engagement_events e
+              ON e.place_id = p.id
+             AND e.event_type_code = 'PLACE_VIEW'
+             AND e.occurred_at >= :fromTime AND e.occurred_at < :toTime
+            WHERE p.status = 'PUBLISHED'
+            GROUP BY p.id, p.name, p.slug, p.address
+            ORDER BY visits DESC, uniqueSessions DESC, p.name ASC
+            """, nativeQuery = true)
+    List<MonumentVisitProjection> countVisitsByMonument(@Param("fromTime") Instant from, @Param("toTime") Instant to);
+
+    @Query(value = """
+            SELECT e.place_id AS placeId, COUNT(*) AS visits
+            FROM engagement_events e
+            WHERE e.event_type_code = 'PLACE_VIEW'
+              AND e.place_id IS NOT NULL
+              AND e.occurred_at >= :fromTime AND e.occurred_at < :toTime
+            GROUP BY e.place_id
+            """, nativeQuery = true)
+    List<MonumentCountProjection> countPlaceViewsByMonument(@Param("fromTime") Instant from, @Param("toTime") Instant to);
+
+    @Query(value = """
+            SELECT e.place_id AS placeId, DATE(e.occurred_at) AS day, COUNT(*) AS value
+            FROM engagement_events e
+            WHERE e.event_type_code = 'PLACE_VIEW'
+              AND e.place_id IS NOT NULL
+              AND e.occurred_at >= :fromTime AND e.occurred_at < :toTime
+            GROUP BY e.place_id, DATE(e.occurred_at)
+            ORDER BY e.place_id ASC, day ASC
+            """, nativeQuery = true)
+    List<MonumentTrendProjection> countPlaceViewsDailyByMonument(@Param("fromTime") Instant from, @Param("toTime") Instant to);
+
+    @Query(value = """
             SELECT COUNT(*) FROM engagement_events e
             WHERE e.occurred_at >= :fromTime AND e.occurred_at < :toTime
               AND (e.business_id = :businessId OR e.place_id = :placeId
