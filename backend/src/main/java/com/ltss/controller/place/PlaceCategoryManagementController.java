@@ -1,13 +1,13 @@
-package com.ltss.controller.content;
+package com.ltss.controller.place;
 
 import com.ltss.common.response.ApiResponse;
 import com.ltss.common.response.ApiResponseFactory;
 import com.ltss.common.response.PageResponse;
 import com.ltss.controller.auth.ClientRequestInfoFactory;
 import com.ltss.dto.auth.response.MessageResponse;
-import com.ltss.dto.content.ArticleCategoryManagementRequest;
-import com.ltss.dto.content.ArticleCategoryManagementResponse;
-import com.ltss.service.content.ArticleCategoryManagementService;
+import com.ltss.dto.place.PlaceCategoryManagementRequest;
+import com.ltss.dto.place.PlaceCategoryManagementResponse;
+import com.ltss.service.place.PlaceCategoryManagementService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -17,14 +17,14 @@ import org.springframework.web.bind.annotation.*;
 
 @Validated
 @RestController
-@RequestMapping("/api/v1/moderation/article-categories")
-public class ArticleCategoryManagementController {
-    private final ArticleCategoryManagementService service;
+@RequestMapping("/api/v1/moderation/place-categories")
+public class PlaceCategoryManagementController {
+    private final PlaceCategoryManagementService service;
     private final ApiResponseFactory responseFactory;
     private final ClientRequestInfoFactory requestInfoFactory;
 
-    public ArticleCategoryManagementController(
-            ArticleCategoryManagementService service,
+    public PlaceCategoryManagementController(
+            PlaceCategoryManagementService service,
             ApiResponseFactory responseFactory,
             ClientRequestInfoFactory requestInfoFactory
     ) {
@@ -34,7 +34,7 @@ public class ArticleCategoryManagementController {
     }
 
     @GetMapping
-    public ApiResponse<PageResponse<ArticleCategoryManagementResponse>> list(
+    public ApiResponse<PageResponse<PlaceCategoryManagementResponse>> list(
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "5") @Min(1) @Max(50) int size
     ) {
@@ -42,24 +42,24 @@ public class ArticleCategoryManagementController {
     }
 
     @GetMapping("/{categoryId}")
-    public ApiResponse<ArticleCategoryManagementResponse> get(
+    public ApiResponse<PlaceCategoryManagementResponse> get(
             @PathVariable @Min(1) Long categoryId
     ) {
         return responseFactory.success(service.get(categoryId));
     }
 
     @PostMapping
-    public ApiResponse<ArticleCategoryManagementResponse> create(
-            @Valid @RequestBody ArticleCategoryManagementRequest request,
+    public ApiResponse<PlaceCategoryManagementResponse> create(
+            @Valid @RequestBody PlaceCategoryManagementRequest request,
             HttpServletRequest httpRequest
     ) {
         return responseFactory.success(service.create(request, requestInfoFactory.from(httpRequest)));
     }
 
     @PutMapping("/{categoryId}")
-    public ApiResponse<ArticleCategoryManagementResponse> update(
+    public ApiResponse<PlaceCategoryManagementResponse> update(
             @PathVariable @Min(1) Long categoryId,
-            @Valid @RequestBody ArticleCategoryManagementRequest request,
+            @Valid @RequestBody PlaceCategoryManagementRequest request,
             HttpServletRequest httpRequest
     ) {
         return responseFactory.success(service.update(categoryId, request, requestInfoFactory.from(httpRequest)));
@@ -71,6 +71,6 @@ public class ArticleCategoryManagementController {
             HttpServletRequest httpRequest
     ) {
         service.delete(categoryId, requestInfoFactory.from(httpRequest));
-        return responseFactory.success(new MessageResponse("Article category deactivated successfully"));
+        return responseFactory.success(new MessageResponse("Place category deactivated successfully"));
     }
 }

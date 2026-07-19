@@ -64,6 +64,12 @@ export const MODERATION_WORKSPACE_LINKS = [
     icon: '▦',
     end: true,
   },
+  {
+    to: '/moderation/place-categories',
+    label: 'Danh mục địa điểm',
+    icon: '⌂',
+    end: true,
+  },
 ]
 
 export function moderationConfigFor(targetType) {

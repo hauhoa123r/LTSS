@@ -10,7 +10,7 @@ function formatDate(value) {
   return new Intl.DateTimeFormat('vi-VN', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value))
 }
 
-function ArticleCategoryManagementPage() {
+function PlaceCategoryManagementPage() {
   const [page, setPage] = useState(0)
   const [state, setState] = useState({ data: null, loading: true, error: null })
   const [dialog, setDialog] = useState(null)
@@ -20,7 +20,7 @@ function ArticleCategoryManagementPage() {
   const load = useCallback(() => {
     let active = true
     setState((current) => ({ ...current, loading: true, error: null }))
-    moderationApi.articleCategories({ page, size: PAGE_SIZE })
+    moderationApi.placeCategories({ page, size: PAGE_SIZE })
       .then((data) => active && setState({ data, loading: false, error: null }))
       .catch((error) => active && setState({ data: null, loading: false, error }))
     return () => { active = false }
@@ -48,7 +48,7 @@ function ArticleCategoryManagementPage() {
   function openDetails(category) {
     setAction({ loading: true, error: null })
     setDialog({ type: 'details', category })
-    moderationApi.getArticleCategory(category.id)
+    moderationApi.getPlaceCategory(category.id)
       .then((data) => {
         setDialog({ type: 'details', category: data })
         setAction({ loading: false, error: null })
@@ -63,8 +63,8 @@ function ArticleCategoryManagementPage() {
     setAction({ loading: true, error: null })
     const payload = { name: form.name.trim(), description: form.description.trim() || null, active: form.active }
     try {
-      if (dialog.type === 'edit') await moderationApi.updateArticleCategory(dialog.category.id, payload)
-      else await moderationApi.createArticleCategory(payload)
+      if (dialog.type === 'edit') await moderationApi.updatePlaceCategory(dialog.category.id, payload)
+      else await moderationApi.createPlaceCategory(payload)
       setDialog(null)
       load()
     } catch (error) {
@@ -75,7 +75,7 @@ function ArticleCategoryManagementPage() {
   async function deactivate() {
     setAction({ loading: true, error: null })
     try {
-      await moderationApi.deleteArticleCategory(dialog.category.id)
+      await moderationApi.deletePlaceCategory(dialog.category.id)
       setDialog(null)
       load()
     } catch (error) {
@@ -85,15 +85,15 @@ function ArticleCategoryManagementPage() {
 
   const categories = state.data?.content ?? []
 
-  return <section className="article-category-page" aria-labelledby="article-category-title">
+  return <section className="article-category-page" aria-labelledby="place-category-title">
     <header className="page-heading page-heading--actions">
-      <div><p className="eyebrow">Không gian kiểm duyệt</p><h1 id="article-category-title">Danh mục bài viết</h1><p>Tổ chức các nhóm nội dung được người quản lý di tích sử dụng khi biên soạn bài viết quảng bá. Mỗi trang hiển thị 5 danh mục.</p></div>
+      <div><p className="eyebrow">Không gian kiểm duyệt</p><h1 id="place-category-title">Danh mục địa điểm</h1><p>Tổ chức các nhóm nội dung được người quản lý di tích sử dụng khi phân loại địa điểm. Mỗi trang hiển thị 5 danh mục.</p></div>
       <button className="button button--primary" type="button" onClick={openCreate}>Thêm danh mục</button>
     </header>
 
     {state.loading && <p className="form-status">Đang tải danh mục…</p>}
     {!state.loading && state.error && <FormMessage error={state.error} />}
-    {!state.loading && !state.error && !categories.length && <div className="discovery-empty"><h2>Chưa có danh mục</h2><p>Hãy tạo danh mục đầu tiên để phân loại bài viết quảng bá.</p></div>}
+    {!state.loading && !state.error && !categories.length && <div className="discovery-empty"><h2>Chưa có danh mục</h2><p>Hãy tạo danh mục đầu tiên để phân loại địa điểm.</p></div>}
     {!state.loading && !state.error && categories.length > 0 && <div className="admin-table-wrap article-category-table">
       <table>
         <thead><tr><th>Danh mục</th><th>Đường dẫn</th><th>Trạng thái</th><th>Cập nhật</th><th>Thao tác</th></tr></thead>
@@ -107,12 +107,12 @@ function ArticleCategoryManagementPage() {
       </table>
     </div>}
 
-    {state.data?.totalPages > 1 && <nav className="pagination" aria-label="Phân trang danh mục bài viết"><button type="button" disabled={state.data.first} onClick={() => setPage((current) => current - 1)}>Trang trước</button><span>Trang {page + 1} / {state.data.totalPages} · {state.data.totalElements} danh mục</span><button type="button" disabled={state.data.last} onClick={() => setPage((current) => current + 1)}>Trang sau</button></nav>}
+    {state.data?.totalPages > 1 && <nav className="pagination" aria-label="Phân trang danh mục địa điểm"><button type="button" disabled={state.data.first} onClick={() => setPage((current) => current - 1)}>Trang trước</button><span>Trang {page + 1} / {state.data.totalPages} · {state.data.totalElements} danh mục</span><button type="button" disabled={state.data.last} onClick={() => setPage((current) => current + 1)}>Trang sau</button></nav>}
 
     {dialog && <div className="admin-action-modal__backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget && !action.loading) setDialog(null) }}>
-      <section className="admin-action-modal article-category-modal" role="dialog" aria-modal="true" aria-labelledby="article-category-dialog-title">
-        <header><div><p className="eyebrow">Quản lý danh mục</p><h2 id="article-category-dialog-title">{dialog.type === 'create' ? 'Thêm danh mục' : dialog.type === 'edit' ? 'Chỉnh sửa danh mục' : dialog.type === 'details' ? 'Chi tiết danh mục' : 'Xóa danh mục'}</h2></div><button type="button" aria-label="Đóng cửa sổ" disabled={action.loading} onClick={() => setDialog(null)}>×</button></header>
-        {dialog.type === 'delete' ? <><p>Danh mục “{dialog.category.name}” sẽ bị vô hiệu hóa và không còn xuất hiện trong trình soạn bài mới. Các bài viết hiện có vẫn được giữ nguyên.</p><div className="article-category-modal__delete"><FormMessage error={action.error} /><footer><button className="button button--secondary" type="button" disabled={action.loading} onClick={() => setDialog(null)}>Hủy</button><button className="button button--danger" type="button" disabled={action.loading} onClick={deactivate}>{action.loading ? 'Đang xử lý…' : 'Xác nhận xóa'}</button></footer></div></> : dialog.type === 'details' ? <div className="article-category-modal__details">
+      <section className="admin-action-modal article-category-modal" role="dialog" aria-modal="true" aria-labelledby="place-category-dialog-title">
+        <header><div><p className="eyebrow">Quản lý danh mục địa điểm</p><h2 id="place-category-dialog-title">{dialog.type === 'create' ? 'Thêm danh mục' : dialog.type === 'edit' ? 'Chỉnh sửa danh mục' : dialog.type === 'details' ? 'Chi tiết danh mục' : 'Xóa danh mục'}</h2></div><button type="button" aria-label="Đóng cửa sổ" disabled={action.loading} onClick={() => setDialog(null)}>×</button></header>
+        {dialog.type === 'delete' ? <><p>Danh mục “{dialog.category.name}” sẽ bị vô hiệu hóa và không còn xuất hiện khi tạo địa điểm mới. Các địa điểm hiện có vẫn được giữ nguyên.</p><div className="article-category-modal__delete"><FormMessage error={action.error} /><footer><button className="button button--secondary" type="button" disabled={action.loading} onClick={() => setDialog(null)}>Hủy</button><button className="button button--danger" type="button" disabled={action.loading} onClick={deactivate}>{action.loading ? 'Đang xử lý…' : 'Xác nhận xóa'}</button></footer></div></> : dialog.type === 'details' ? <div className="article-category-modal__details">
           {action.loading ? <p className="form-status">Đang tải...</p> : action.error ? <FormMessage error={action.error} /> : <div className="admin-details-list">
             <p><strong>ID:</strong> #{dialog.category.id}</p>
             <p><strong>Tên danh mục:</strong> {dialog.category.name}</p>
@@ -137,4 +137,4 @@ function ArticleCategoryManagementPage() {
   </section>
 }
 
-export default ArticleCategoryManagementPage
+export default PlaceCategoryManagementPage

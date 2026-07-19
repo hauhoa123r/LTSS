@@ -29,6 +29,7 @@ spring:
     locations: classpath:db/migration
     clean-disabled: true
     validate-on-migrate: true
+    baseline-on-migrate: true
   jpa:
     open-in-view: false
     show-sql: false

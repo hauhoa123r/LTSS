@@ -1,7 +1,6 @@
-package com.ltss.service.content.impl;
+package com.ltss.service.place.impl;
 
-import com.ltss.service.content.ArticleCategoryManagementService;
-
+import com.ltss.service.place.PlaceCategoryManagementService;
 import com.ltss.common.exception.ConflictException;
 import com.ltss.common.exception.ResourceNotFoundException;
 import com.ltss.common.response.PageResponse;
@@ -9,10 +8,10 @@ import com.ltss.repository.auth.AuthorizationRepository;
 import com.ltss.security.auth.CurrentUserService;
 import com.ltss.service.auth.AuditService;
 import com.ltss.service.auth.ClientRequestInfo;
-import com.ltss.dto.content.ArticleCategoryManagementRequest;
-import com.ltss.dto.content.ArticleCategoryManagementResponse;
-import com.ltss.entity.content.ArticleCategoryEntity;
-import com.ltss.repository.content.ArticleCategoryRepository;
+import com.ltss.dto.place.PlaceCategoryManagementRequest;
+import com.ltss.dto.place.PlaceCategoryManagementResponse;
+import com.ltss.entity.place.PlaceCategoryEntity;
+import com.ltss.repository.place.PlaceCategoryRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -23,16 +22,16 @@ import java.util.Locale;
 import java.util.Set;
 
 @Service
-public class ArticleCategoryManagementServiceImpl implements ArticleCategoryManagementService {
+public class PlaceCategoryManagementServiceImpl implements PlaceCategoryManagementService {
     private static final Set<String> ALLOWED_ROLES = Set.of("MODERATOR", "ADMINISTRATOR");
 
-    private final ArticleCategoryRepository repository;
+    private final PlaceCategoryRepository repository;
     private final AuthorizationRepository authorizationRepository;
     private final CurrentUserService currentUserService;
     private final AuditService auditService;
 
-    public ArticleCategoryManagementServiceImpl(
-            ArticleCategoryRepository repository,
+    public PlaceCategoryManagementServiceImpl(
+            PlaceCategoryRepository repository,
             AuthorizationRepository authorizationRepository,
             CurrentUserService currentUserService,
             AuditService auditService
@@ -45,46 +44,46 @@ public class ArticleCategoryManagementServiceImpl implements ArticleCategoryMana
 
     @Transactional(readOnly = true)
     @Override
-    public PageResponse<ArticleCategoryManagementResponse> list(int page, int size) {
+    public PageResponse<PlaceCategoryManagementResponse> list(int page, int size) {
         requireReviewer();
         return PageResponse.from(repository.findAllByOrderByUpdatedAtDesc(PageRequest.of(page, size)).map(this::response));
     }
 
     @Transactional(readOnly = true)
     @Override
-    public ArticleCategoryManagementResponse get(Long categoryId) {
+    public PlaceCategoryManagementResponse get(Long categoryId) {
         requireReviewer();
         return response(requireCategory(categoryId));
     }
 
     @Transactional
     @Override
-    public ArticleCategoryManagementResponse create(
-            ArticleCategoryManagementRequest request, ClientRequestInfo requestInfo
+    public PlaceCategoryManagementResponse create(
+            PlaceCategoryManagementRequest request, ClientRequestInfo requestInfo
     ) {
         Long actorId = requireReviewer();
         String name = normalizeRequired(request.name());
         requireUniqueName(name, null);
-        ArticleCategoryEntity category = repository.save(new ArticleCategoryEntity(
+        PlaceCategoryEntity category = repository.save(new PlaceCategoryEntity(
                 name, uniqueSlug(name, null), normalize(request.description()), request.active(), actorId
         ));
-        auditService.recordDomain(actorId, "ARTICLE_CATEGORY_CREATED", "ARTICLE_CATEGORY", category.getId(), requestInfo);
+        auditService.recordDomain(actorId, "PLACE_CATEGORY_CREATED", "PLACE_CATEGORY", category.getId(), requestInfo);
         return response(category);
     }
 
     @Transactional
     @Override
-    public ArticleCategoryManagementResponse update(
-            Long categoryId, ArticleCategoryManagementRequest request, ClientRequestInfo requestInfo
+    public PlaceCategoryManagementResponse update(
+            Long categoryId, PlaceCategoryManagementRequest request, ClientRequestInfo requestInfo
     ) {
         Long actorId = requireReviewer();
-        ArticleCategoryEntity category = requireCategory(categoryId);
+        PlaceCategoryEntity category = requireCategory(categoryId);
         String name = normalizeRequired(request.name());
         requireUniqueName(name, categoryId);
         category.update(
                 name, uniqueSlug(name, categoryId), normalize(request.description()), request.active(), actorId
         );
-        auditService.recordDomain(actorId, "ARTICLE_CATEGORY_UPDATED", "ARTICLE_CATEGORY", categoryId, requestInfo);
+        auditService.recordDomain(actorId, "PLACE_CATEGORY_UPDATED", "PLACE_CATEGORY", categoryId, requestInfo);
         return response(category);
     }
 
@@ -92,9 +91,9 @@ public class ArticleCategoryManagementServiceImpl implements ArticleCategoryMana
     @Override
     public void delete(Long categoryId, ClientRequestInfo requestInfo) {
         Long actorId = requireReviewer();
-        ArticleCategoryEntity category = requireCategory(categoryId);
+        PlaceCategoryEntity category = requireCategory(categoryId);
         category.deactivate(actorId);
-        auditService.recordDomain(actorId, "ARTICLE_CATEGORY_DEACTIVATED", "ARTICLE_CATEGORY", categoryId, requestInfo);
+        auditService.recordDomain(actorId, "PLACE_CATEGORY_DEACTIVATED", "PLACE_CATEGORY", categoryId, requestInfo);
     }
 
     private Long requireReviewer() {
@@ -104,16 +103,16 @@ public class ArticleCategoryManagementServiceImpl implements ArticleCategoryMana
         return actorId;
     }
 
-    private ArticleCategoryEntity requireCategory(Long categoryId) {
+    private PlaceCategoryEntity requireCategory(Long categoryId) {
         return repository.findById(categoryId)
-                .orElseThrow(() -> new ResourceNotFoundException("Article category was not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Place category was not found"));
     }
 
     private void requireUniqueName(String name, Long currentId) {
         boolean exists = currentId == null
                 ? repository.existsByCategoryNameIgnoreCase(name)
                 : repository.existsByCategoryNameIgnoreCaseAndIdNot(name, currentId);
-        if (exists) throw new ConflictException("Article category name already exists");
+        if (exists) throw new ConflictException("Place category name already exists");
     }
 
     private String uniqueSlug(String name, Long currentId) {
@@ -132,8 +131,8 @@ public class ArticleCategoryManagementServiceImpl implements ArticleCategoryMana
         return slug;
     }
 
-    private ArticleCategoryManagementResponse response(ArticleCategoryEntity category) {
-        return new ArticleCategoryManagementResponse(
+    private PlaceCategoryManagementResponse response(PlaceCategoryEntity category) {
+        return new PlaceCategoryManagementResponse(
                 category.getId(), category.getCategoryName(), category.getSlug(), category.getDescription(),
                 category.isActive(), category.getCreatedAt(), category.getUpdatedAt()
         );
