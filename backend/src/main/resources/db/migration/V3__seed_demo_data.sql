@@ -295,7 +295,7 @@ VALUES
     (@moderator_user_id, 'PANORAMA_360', 'LTSS_CDN', 'demo/places/thanh-co-son-tay-panorama.jpg',
      'https://commons.wikimedia.org/wiki/Special:FilePath/Th%C3%A0nh_c%E1%BB%95_S%C6%A1n_T%C3%A2y_2021.jpg?width=1280',
      'https://commons.wikimedia.org/wiki/Special:FilePath/Th%C3%A0nh_c%E1%BB%95_S%C6%A1n_T%C3%A2y_2021.jpg?width=500',
-     'image/jpeg', 173015, 1280, 1279, NULL, SHA2('demo-places-thanh-co-son-tay-panorama', 256)),
+     'image/jpeg', 173015, 1280, 640, NULL, SHA2('demo-places-thanh-co-son-tay-panorama', 256)),
     (@moderator_user_id, 'IMAGE', 'LTSS_CDN', 'demo/places/chua-mia-cover.jpg',
      'https://commons.wikimedia.org/wiki/Special:FilePath/Ch%C3%B9a_M%C3%ADa.jpg?width=1280',
      'https://commons.wikimedia.org/wiki/Special:FilePath/Ch%C3%B9a_M%C3%ADa.jpg?width=640',

@@ -24,6 +24,7 @@ import ModerationQueuePage from '../../features/moderation/pages/ModerationQueue
 import ModerationDetailPage from '../../features/moderation/pages/ModerationDetailPage.jsx'
 import NotificationsPage from '../../features/moderation/pages/NotificationsPage.jsx'
 import ArticleCategoryManagementPage from '../../features/moderation/pages/ArticleCategoryManagementPage.jsx'
+import PlaceCategoryManagementPage from '../../features/moderation/pages/PlaceCategoryManagementPage.jsx'
 import PublicToursPage from '../../features/tours/pages/PublicToursPage.jsx'
 import TourDetailPage from '../../features/tours/pages/TourDetailPage.jsx'
 import MyToursPage from '../../features/tours/pages/MyToursPage.jsx'
@@ -107,6 +108,7 @@ function AppRouter() {
           <Route path="moderation/articles" element={<ModerationQueuePage key="ARTICLE" targetType="ARTICLE" />} />
           <Route path="moderation/quizzes" element={<ModerationQueuePage key="QUIZ" targetType="QUIZ" />} />
           <Route path="moderation/article-categories" element={<ArticleCategoryManagementPage />} />
+          <Route path="moderation/place-categories" element={<PlaceCategoryManagementPage />} />
           <Route path="moderation/notifications" element={<NotificationsPage workspace="moderation" />} />
           <Route path="moderation/articles/:caseId" element={<ModerationDetailPage />} />
           <Route path="moderation/quizzes/:caseId" element={<ModerationDetailPage />} />

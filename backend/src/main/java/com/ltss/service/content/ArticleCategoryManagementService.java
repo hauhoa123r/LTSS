@@ -9,6 +9,8 @@ public interface ArticleCategoryManagementService {
 
     PageResponse<ArticleCategoryManagementResponse> list(int page, int size);
 
+    ArticleCategoryManagementResponse get(Long categoryId);
+
     ArticleCategoryManagementResponse create(
             ArticleCategoryManagementRequest request, ClientRequestInfo requestInfo
     );
