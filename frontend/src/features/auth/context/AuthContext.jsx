@@ -12,27 +12,34 @@ export function AuthProvider({ children }) {
   const acceptSession = useCallback((session) => {
     setAccessToken(session.accessToken)
     setUser(session.user)
+    sessionStorage.setItem('is_logged_in', 'true')
   }, [])
 
   const clearSession = useCallback(() => {
     clearAccessToken()
     setUser(null)
+    sessionStorage.removeItem('is_logged_in')
   }, [])
 
   useEffect(() => {
     let active = true
 
-    bootstrapSessionRequest ??= authApi.refresh()
-    bootstrapSessionRequest
-      .then((session) => {
-        if (active) acceptSession(session)
-      })
-      .catch(() => {
-        if (active) clearSession()
-      })
-      .finally(() => {
-        if (active) setIsReady(true)
-      })
+    if (sessionStorage.getItem('is_logged_in') === 'true') {
+      bootstrapSessionRequest ??= authApi.refresh()
+      bootstrapSessionRequest
+        .then((session) => {
+          if (active) acceptSession(session)
+        })
+        .catch(() => {
+          if (active) clearSession()
+        })
+        .finally(() => {
+          if (active) setIsReady(true)
+        })
+    } else {
+      clearSession()
+      setIsReady(true)
+    }
 
     return () => {
       active = false

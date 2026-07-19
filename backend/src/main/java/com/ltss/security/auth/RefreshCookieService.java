@@ -12,8 +12,7 @@ public class RefreshCookieService {
 
     public RefreshCookieService(
             RefreshCookieProperties cookieProperties,
-            AccountProperties accountProperties
-    ) {
+            AccountProperties accountProperties) {
         this.cookieProperties = cookieProperties;
         this.accountProperties = accountProperties;
     }
