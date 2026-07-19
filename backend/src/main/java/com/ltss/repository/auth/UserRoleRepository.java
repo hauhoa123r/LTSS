@@ -16,6 +16,12 @@ public interface UserRoleRepository extends JpaRepository<UserRoleEntity, UserRo
             """)
     List<String> findActiveDirectRoleCodes(@Param("userId") Long userId);
 
+    @Query("""
+            select mapping from UserRoleEntity mapping
+            where mapping.id.userId = :userId and mapping.active = true
+            """)
+    List<UserRoleEntity> findActiveByUserId(@Param("userId") Long userId);
+
     @Query("select count(mapping) from UserRoleEntity mapping where mapping.id.userId = :userId and mapping.active = true")
     long countActiveByUserId(@Param("userId") Long userId);
 }

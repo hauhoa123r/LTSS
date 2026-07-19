@@ -68,6 +68,42 @@ public class AdministrationServiceImpl implements AdministrationService {
 
     @Transactional
     @Override
+    public AdminUserResponse updateUser(Long userId, UpdateAdminUserRequest request,
+                                        ClientRequestInfo requestInfo) {
+        Long actorId = requireAdministrator();
+        requireNotSelf(actorId, userId);
+        UserEntity user = userRepository.findLockedById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User was not found"));
+        requireMutableUser(user);
+        if (!Objects.equals(user.getVersion(), request.version())) {
+            throw new ConflictException("User was changed by another request; reload and try again");
+        }
+
+        String phone = normalizeNullable(request.phone());
+        if (phone != null && userRepository.existsByPhoneAndIdNot(phone, userId)) {
+            throw new ConflictException("This information is already linked to another user.");
+        }
+
+        List<String> oldDirectRoles = userRoleRepository.findActiveDirectRoleCodes(userId);
+        Map<String, Object> oldValues = userAuditValues(user, oldDirectRoles);
+
+        user.updateProfile(
+                request.fullName().trim(),
+                request.displayName().trim(),
+                phone,
+                normalizeNullable(request.address())
+        );
+
+        auditService.recordDomainChange(actorId, "ADMIN_USER_ACCOUNT_UPDATED", "USER", userId,
+                oldValues,
+                newUserAuditValues(user, oldDirectRoles, request.reason().trim()),
+                requestInfo);
+        userRepository.flush();
+        return response(user);
+    }
+
+    @Transactional
+    @Override
     public AdminUserResponse changeStatus(Long userId, ChangeUserStatusRequest request,
                                           ClientRequestInfo requestInfo) {
         Long actorId = requireAdministrator();
@@ -158,6 +194,7 @@ public class AdministrationServiceImpl implements AdministrationService {
     private AdminUserResponse response(UserEntity user) {
         return new AdminUserResponse(
                 user.getId(), user.getFullName(), user.getDisplayName(), user.getEmail(), user.getPhone(),
+                user.getAddress(),
                 user.getStatus(), user.getEmailVerifiedAt(), user.getLastLoginAt(), user.getLockedUntil(),
                 user.getDeactivatedAt(), user.getDeactivatedByUserId(), user.getVersion(),
                 userRoleRepository.findActiveDirectRoleCodes(user.getId()),
@@ -172,10 +209,14 @@ public class AdministrationServiceImpl implements AdministrationService {
 
     private UserEntity requireMutableUser(Long id) {
         UserEntity user = requireUser(id);
+        requireMutableUser(user);
+        return user;
+    }
+
+    private void requireMutableUser(UserEntity user) {
         if (user.getStatus() == UserStatus.DELETED) {
             throw new ConflictException("Deleted users cannot receive role changes");
         }
-        return user;
     }
 
     private Long requireAdministrator() {
@@ -190,5 +231,28 @@ public class AdministrationServiceImpl implements AdministrationService {
         if (Objects.equals(actorId, targetId)) {
             throw new ConflictException("Administrators cannot change their own status or roles through this flow");
         }
+    }
+
+    private String normalizeNullable(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        return value.trim();
+    }
+
+    private Map<String, Object> userAuditValues(UserEntity user, List<String> roles) {
+        Map<String, Object> values = new LinkedHashMap<>();
+        values.put("fullName", user.getFullName());
+        values.put("displayName", user.getDisplayName());
+        values.put("phone", user.getPhone());
+        values.put("address", user.getAddress());
+        values.put("directRoles", roles);
+        return values;
+    }
+
+    private Map<String, Object> newUserAuditValues(UserEntity user, List<String> roles, String reason) {
+        Map<String, Object> values = userAuditValues(user, roles);
+        values.put("reason", reason);
+        return values;
     }
 }

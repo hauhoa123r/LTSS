@@ -48,6 +48,15 @@ public class AdministrationController {
         return responseFactory.success(administrationService.user(userId));
     }
 
+    @PutMapping("/users/{userId}")
+    public ApiResponse<AdminUserResponse> updateUser(
+            @PathVariable @Min(1) Long userId,
+            @Valid @RequestBody UpdateAdminUserRequest request,
+            HttpServletRequest httpRequest) {
+        return responseFactory.success(administrationService.updateUser(
+                userId, request, requestInfoFactory.from(httpRequest)));
+    }
+
     @PutMapping("/users/{userId}/status")
     public ApiResponse<AdminUserResponse> changeStatus(
             @PathVariable @Min(1) Long userId,

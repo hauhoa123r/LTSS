@@ -22,6 +22,7 @@ public enum AuditActionCode {
     ADMIN_USER_STATUS_CHANGED("Thay đổi trạng thái người dùng"),
     ADMIN_USER_ROLE_ASSIGNED("Gán vai trò người dùng"),
     ADMIN_USER_ROLE_REVOKED("Thu hồi vai trò người dùng"),
+    ADMIN_USER_ACCOUNT_UPDATED("Cập nhật thông tin và vai trò người dùng"),
     TOUR_CREATED("Tạo lịch trình"),
     TOUR_UPDATED("Cập nhật lịch trình"),
     TOUR_COPIED("Sao chép lịch trình"),

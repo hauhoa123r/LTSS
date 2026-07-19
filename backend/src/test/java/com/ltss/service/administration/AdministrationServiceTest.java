@@ -81,6 +81,50 @@ class AdministrationServiceTest {
     }
 
     @Test
+    void updateUserChangesProfileWithoutChangingDirectRoles() {
+        allowAdmin();
+        UserEntity target = new UserEntity("Nguyễn Văn A", "A", "a@example.com", "hash");
+        ReflectionTestUtils.setField(target, "id", 20L);
+        ReflectionTestUtils.setField(target, "version", 0);
+        target.verifyEmail(NOW.minusSeconds(100));
+        when(userRepository.findLockedById(20L)).thenReturn(Optional.of(target));
+        when(userRepository.existsByPhoneAndIdNot("0912345678", 20L)).thenReturn(false);
+        when(userRoleRepository.findActiveDirectRoleCodes(20L))
+                .thenReturn(List.of("TOURIST"), List.of("TOURIST"));
+        when(authorizationRepository.findEffectiveRoleCodes(20L)).thenReturn(List.of("TOURIST"));
+
+        AdminUserResponse response = service.updateUser(20L,
+                new UpdateAdminUserRequest("Nguyễn Văn B", "B", "0912345678",
+                        "Sơn Tây", "Cập nhật hồ sơ", 0),
+                REQUEST);
+
+        assertEquals("Nguyễn Văn B", response.fullName());
+        assertEquals("B", response.displayName());
+        assertEquals("0912345678", response.phone());
+        assertEquals("Sơn Tây", response.address());
+        assertEquals(List.of("TOURIST"), response.directRoles());
+        verify(tokenService, never()).revokeAllRefreshTokens(20L);
+        verify(auditService).recordDomainChange(eq(10L), eq("ADMIN_USER_ACCOUNT_UPDATED"),
+                eq("USER"), eq(20L), anyMap(), anyMap(), eq(REQUEST));
+    }
+
+    @Test
+    void updateUserRejectsPhoneLinkedToAnotherUser() {
+        allowAdmin();
+        UserEntity target = new UserEntity("Nguyễn Văn A", "A", "a@example.com", "hash");
+        ReflectionTestUtils.setField(target, "id", 20L);
+        ReflectionTestUtils.setField(target, "version", 0);
+        when(userRepository.findLockedById(20L)).thenReturn(Optional.of(target));
+        when(userRepository.existsByPhoneAndIdNot("0912345678", 20L)).thenReturn(true);
+
+        assertThrows(ConflictException.class, () -> service.updateUser(20L,
+                new UpdateAdminUserRequest("Nguyễn Văn B", "B", "0912345678",
+                        "Sơn Tây", "Cập nhật hồ sơ", 0),
+                REQUEST));
+        verify(roleRepository, never()).findByRoleCodeAndActiveTrue(anyString());
+    }
+
+    @Test
     void adminResetPasswordUsesDefaultPasswordAndRevokesSessions() {
         allowAdmin();
         UserEntity target = new UserEntity("Nguyễn Văn A", "A", "a@example.com", "old-hash");

@@ -11,6 +11,7 @@ public record AdminUserResponse(
         String displayName,
         String email,
         String phone,
+        String address,
         UserStatus status,
         Instant emailVerifiedAt,
         Instant lastLoginAt,

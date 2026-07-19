@@ -5,6 +5,7 @@ const data = (response) => response.data.data
 export const administrationApi = {
   users: (params) => httpClient.get('/admin/users', { params }).then(data),
   user: (id) => httpClient.get(`/admin/users/${id}`).then(data),
+  updateUser: (id, payload) => httpClient.put(`/admin/users/${id}`, payload).then(data),
   status: (id, payload) => httpClient.put(`/admin/users/${id}/status`, payload).then(data),
   resetPassword: (id, payload) => httpClient.put(`/admin/users/${id}/password`, payload).then(data),
   assignRole: (id, role, payload) => httpClient.put(`/admin/users/${id}/roles/${role}`, payload).then(data),

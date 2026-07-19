@@ -15,6 +15,9 @@ public interface AdministrationService {
 
     AdminUserResponse user(Long userId);
 
+    AdminUserResponse updateUser(Long userId, UpdateAdminUserRequest request,
+                                  ClientRequestInfo requestInfo);
+
     AdminUserResponse changeStatus(Long userId, ChangeUserStatusRequest request,
                                           ClientRequestInfo requestInfo);
 

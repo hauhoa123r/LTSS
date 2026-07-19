@@ -5955,7 +5955,13 @@ select option {
   background: rgba(255, 255, 255, 0.026);
 }
 
-.admin-user-detail__panel header { margin-bottom: 16px; }
+.admin-user-detail__panel header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
 .admin-user-detail__panel h2 { margin: 4px 0 0; color: #fff2c6; font-size: 1.06rem; }
 
 .admin-user-detail__actions {
@@ -5999,9 +6005,135 @@ select option {
   background: rgba(240, 192, 64, 0.09);
 }
 
+.admin-user-detail__roles label:has(input:disabled) {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
 .admin-user-detail__roles input { accent-color: #f0c040; }
 .admin-user-detail__roles small { margin-left: auto; color: #f1c548; font-size: 0.55rem; }
 .admin-user-detail__roles + .admin-user-detail__notice { margin-top: 14px; }
+
+.admin-user-detail__roles > span {
+  display: flex;
+  min-height: 39px;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid rgba(240, 192, 64, 0.09);
+  border-radius: 9px;
+  color: rgba(253, 246, 236, 0.44);
+  background: rgba(255, 255, 255, 0.022);
+  font-size: 0.64rem;
+}
+
+.admin-user-detail__roles > span.is-assigned,
+.admin-user-detail__roles > span.is-inherited {
+  border-color: rgba(240, 192, 64, 0.24);
+  color: #fff2c6;
+  background: rgba(240, 192, 64, 0.075);
+}
+
+.admin-user-detail__roles > span b {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-user-detail__edit-panel {
+  display: grid;
+  gap: 14px;
+}
+
+.admin-user-detail__edit-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid rgba(240, 192, 64, 0.1);
+  border-radius: 12px;
+  background: rgba(240, 192, 64, 0.06);
+}
+
+.admin-user-detail__edit-summary > div {
+  min-width: 0;
+  padding: 13px;
+  background: rgba(30, 8, 8, 0.38);
+}
+
+.admin-user-detail__edit-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.admin-user-detail__edit-form label {
+  display: grid;
+  gap: 7px;
+  color: rgba(253, 246, 236, 0.58);
+  font-size: 0.68rem;
+  font-weight: 750;
+}
+
+.admin-user-detail__edit-form label span {
+  color: #fca5a5;
+}
+
+.admin-user-detail__edit-form input,
+.admin-user-detail__edit-form select,
+.admin-user-detail__edit-form textarea {
+  width: 100%;
+  border: 1px solid rgba(240, 192, 64, 0.14);
+  border-radius: 10px;
+  color: #fdf6ec;
+  background: rgba(0, 0, 0, 0.18);
+  font: inherit;
+}
+
+.admin-user-detail__edit-form input,
+.admin-user-detail__edit-form select {
+  min-height: 42px;
+  padding: 0 12px;
+}
+
+.admin-user-detail__edit-form textarea {
+  resize: vertical;
+  min-height: 86px;
+  padding: 12px;
+}
+
+.admin-user-detail__edit-form input:disabled {
+  color: rgba(253, 246, 236, 0.4);
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.admin-user-detail__edit-form input:focus,
+.admin-user-detail__edit-form select:focus,
+.admin-user-detail__edit-form textarea:focus {
+  border-color: rgba(240, 192, 64, 0.52);
+  outline: 0;
+  box-shadow: 0 0 0 3px rgba(240, 192, 64, 0.08);
+}
+
+.admin-user-detail__edit-form small {
+  color: #fca5a5;
+  font-size: 0.62rem;
+}
+
+.admin-user-detail__edit-form-wide,
+.admin-user-detail__edit-form .form-message,
+.admin-user-detail__edit-form footer {
+  grid-column: 1 / -1;
+}
+
+.admin-user-detail__edit-form footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
 
 .admin-user-detail__panel--meta { padding-bottom: 0; overflow: hidden; }
 .admin-user-detail__panel--meta header { padding-bottom: 3px; }
@@ -6765,6 +6897,8 @@ select option {
 @media (max-width: 850px) {
   .admin-user-detail__overview,
   .admin-user-detail__grid,
+  .admin-user-detail__edit-summary,
+  .admin-user-detail__edit-form,
   .monument-stats__grid { grid-template-columns: 1fr; }
 }
 
